@@ -12,12 +12,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
-        name: 'PWA test',
-        short_name: 'PWATest',
+        name: 'RDFSheet',
+        short_name: 'RDFSheet',
         start_url: '.',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#3eaf7c',
+        theme_color: '#efd996',
         icons: [
           {
             src: './icons/web-app-manifest-192x192.png',

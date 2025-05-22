@@ -8,27 +8,27 @@ realfavicongeneratorのサイトに頼んだら
 site.webmanifestというファイルの中にマニフェスト
 ファイルまで作ってくれたけど、その中身は以下のJSON。
 
-{
-  "name": "RDFSheet",
-  "short_name": "RDFSheet",
-  "icons": [
     {
-      "src": "/RDFSheet/icons/web-app-manifest-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/RDFSheet/icons/web-app-manifest-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "name": "RDFSheet",
+      "short_name": "RDFSheet",
+      "icons": [
+        {
+          "src": "/RDFSheet/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable"
+        },
+        {
+          "src": "/RDFSheet/icons/web-app-manifest-512x512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "maskable"
+        }
+      ],
+      "theme_color": "#efd996",
+      "background_color": "#ffffff",
+      "display": "standalone"
     }
-  ],
-  "theme_color": "#efd996",
-  "background_color": "#ffffff",
-  "display": "standalone"
-}
 
 
 あと、生成した時に`<head>`に埋め込む要素も生成して
