@@ -1,11 +1,42 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
-.card {
-  padding: 2em;
+#myTabs {
+  display: flex;
+  border-bottom: 1px solid gray;
+}
+
+#myTabs button {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.growBox {
+  flex-grow: 1;
+}
+
+#myContent {
+  flex-grow: 1;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  width: 100vw;
+}
+
+#mySheets {
+  display: block;
+  height: 100%;
+}
+
+#mySettings {
+  display: none;
+  height: 100%;
 }
 

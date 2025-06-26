@@ -31,3 +31,11 @@ univerの方が良いのかもしれないけど、枯れた技術を使いた�
 `application/x-rdfsheet+json`。File Handling APIで、PWAと関連
 付けできる。manifest.jsonの中に`"file_handlers": ・・・`と
 設定するらしい。
+
+2025,06/26: 以下を参考にLuckySheet入れてみた。
+
+* <https://github.com/dream-num/luckysheet-react>
+
+chatが動かないことが判明したのでUniverでも良い気が
+してきたけど、UniverはUniverで良くわかんない。
+ということで、とりあえずLuchySheetで行こう。

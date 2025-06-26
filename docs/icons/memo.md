@@ -1,5 +1,13 @@
 
-アイコンはGeminiに作ってもらった。その画像を
+アイコンはGeminiに作ってもらった。プロンプトは
+「RDFSheetという名前のアプリを作る予定です。
+そのアプリはスプレッドシートでRDFデータを手軽に
+作るためのアプリなのですが、それのアイコンを
+作ってくれませんか？」
+
+* `Gemini_Generated_Image_si9fqlsi9fqlsi9f.jpeg`
+
+その画像を
 以下のサイトで上手く調整してもらった。
 
 * <https://realfavicongenerator.net/>
