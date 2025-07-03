@@ -1,0 +1,45 @@
+/* Menu.css */
+.menu_div {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: 3rem;
+}
+
+.hamburger {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 2100;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+.menu {
+    display: none;
+    position: fixed;
+    top:0;
+    left: 0;
+    z-index: 2090;
+    width: 70vw;
+    height: 100%;
+    background: #eee;
+    padding: 3rem 1rem 1rem 1rem;
+}
+
+.menu.open {
+    display: block;
+}
+
+.menu ul {
+}
+
+.menu li {
+    list-style: none;
+    margin: 0.5rem 0;
+}

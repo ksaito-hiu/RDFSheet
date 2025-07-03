@@ -6,23 +6,16 @@
   flex-direction: column;
 }
 
-#myTabs {
+header {
   display: flex;
-  border-bottom: 1px solid gray;
-}
-
-#myTabs button {
-  padding: 10px 20px;
-  border: none;
-  background: none;
-  cursor: pointer;
+  flex-direction: row;
 }
 
 .growBox {
   flex-grow: 1;
 }
 
-#myContent {
+main {
   flex-grow: 1;
   margin: 0;
   padding: 0;
@@ -30,13 +23,16 @@
   width: 100vw;
 }
 
-#mySheets {
-  display: block;
+.sheets {
+  width: 100vw;
   height: 100%;
 }
 
-#mySettings {
+.settings {
+  width: 100vw;
+  height: 100%;
+}
+
+.s_logged_in, s_logged_out {
   display: none;
-  height: 100%;
 }
-
