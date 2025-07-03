@@ -39,3 +39,9 @@ univerの方が良いのかもしれないけど、枯れた技術を使いた�
 chatが動かないことが判明したのでUniverでも良い気が
 してきたけど、UniverはUniverで良くわかんない。
 ということで、とりあえずLuchySheetで行こう。
+
+2025,07/03: 現段階で`@inrupt/solid-client-authn-browser`の最新版に
+バグあり。<https://github.com/inrupt/solid-client-authn-js/issues/3927>
+バージョン2.3.0を入れて動かしてる。npm installでなくnpm ciがいいかも。
+それでも問題あったので、一時的にindex.htmlに`@inrupt/solid-client-authn-browser`の
+CDNを入れてutil.tsの中で対処しておいた。

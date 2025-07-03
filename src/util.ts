@@ -1,7 +1,26 @@
-import { handleIncomingRedirect, login, logout } from '@inrupt/solid-client-authn-browser';
+//import { handleIncomingRedirect, login, logout } from '@inrupt/solid-client-authn-browser';
+const  { handleIncomingRedirect, login, logout } = (window as any).solidClientAuthentication;
 
-export const myLogin = login;
-export const myLogout = logout;
+const localStorage = (window as any).localStorage;
+
+const RDFSheetLocalStorageKey = 'RDFSheetLocalStorageKey';
+const saveDefaultIdp = (idp: string) => {
+  localStorage.setItem(RDFSheetLocalStorageKey,idp);
+}
+export const loadDefaultIdp = () => {
+  const idp = localStorage.getItem(RDFSheetLocalStorageKey);
+  return idp ? idp : 'https://solidcommunity.net';
+}
+
+export const myLogin = async (idp: string) => {
+  saveDefaultIdp(idp); // ログイン前だけどこのタイミングしか・・・
+  await login({
+    oidcIssuer: idp
+  });
+};
+export const myLogout = () => {
+  logout();
+};
 
 export let isLoggedIn: boolean = false;
 export let webId: string = 'not logged in';
