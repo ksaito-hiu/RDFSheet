@@ -1,27 +1,75 @@
 import { useState } from 'react';
+import { loadSheets, saveSheets, importRDF, exportRDF, openHelp, openAbout } from './util';
 import './App.css';
 import LoginPane from './LoginPane';
 import Menu from './Menu';
+import ToggleDiv from './ToggleDiv';
+import MyDialog from './MyDialog';
 import Luckysheet from './Luckysheet';
 import Settings from './Settings';
 
 const App: React.FC = () => {
-  const [activeContent, setActiveContent] = useState('sheets');
+  const [isSheetsActive, setSheetsActive] = useState(true);
+  const [isSettingsActive, setSettingsActive] = useState(false);
+  const [isImportOpen, setImportOpen] = useState(false);
+  const [isExportOpen, setExportOpen] = useState(false);
+
+  const selectedListener = (selected: string) => {
+    if (selected === 'sheets') {
+      setSheetsActive(true);
+      setSettingsActive(false);
+    } else if (selected === 'settings') {
+      setSheetsActive(false);
+      setSettingsActive(true);
+    } else if (selected === 'load') {
+      loadSheets();
+    } else if (selected === 'save') {
+      saveSheets();
+    } else if (selected === 'import') {
+      setImportOpen(true);
+    } else if (selected === 'export') {
+      setExportOpen(true);
+    } else if (selected === 'help') {
+      openHelp();
+    } else if (selected === 'about') {
+      openAbout();
+    } else {
+      console.log('GAHA: ????????');
+    }
+  };
+
+  const processImport = () => {
+    importRDF();
+    setImportOpen(false); // MyDialog消すため。でもなぜか効果無し。
+  };
+
+  const processExport = () => {
+    exportRDF();
+    setExportOpen(false); // MyDialog消すため。でもなぜか効果無し。
+  };
 
   return (
     <>
       <header>
-        <Menu onSelect={(selected) => setActiveContent(selected)} />
+        <Menu onSelect={selectedListener} />
         <LoginPane/>
       </header>
       <main>
-        <div className="sheets" style={{ display: activeContent === 'sheets' ? 'block' : 'none' }}>
+        <ToggleDiv isVisible={isSheetsActive} cName="sheets">
           <Luckysheet/>
-        </div>
-        <div className="settings" style={{ display: activeContent === 'settings' ? 'block' : 'none' }}>
+        </ToggleDiv>
+        <ToggleDiv isVisible={isSettingsActive} cName="settings">
           <Settings/>
-        </div>
+        </ToggleDiv>
       </main>
+      <MyDialog isVisible={isImportOpen} setVisible={setImportOpen}>
+        <p>ImportDialog</p>
+        <button type="button" onClick={processImport}>import</button>
+      </MyDialog>
+      <MyDialog isVisible={isExportOpen} setVisible={setExportOpen}>
+        <p>ExportDialog</p>
+        <button type="button" onClick={processExport}>export</button>
+      </MyDialog>
     </>
   )
 }

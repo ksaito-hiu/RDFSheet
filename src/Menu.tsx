@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { loadSheets, saveSheets, importRDF, exportRDF, openHelp, openAbout } from './util';
 import './Menu.css';
 
 type Props = {
-  onSelect: (page: string) => void;
+  onSelect: (selected: string) => void;
 };
 
 const Menu: React.FC<Props> = ({ onSelect }) => {
   const [ open, setOpen ] = useState(false);
+
+  const closeAndNotify = (menuStr: string) => {
+    setOpen(false);
+    onSelect(menuStr);
+  };
 
   return(
     <div className="menu_div">
@@ -16,20 +20,20 @@ const Menu: React.FC<Props> = ({ onSelect }) => {
         <ul>
           <li>画面切り替え
             <ul>
-              <li onClick={() => {setOpen(false);onSelect('sheets');}}>Sheet</li>
-              <li onClick={() => {setOpen(false);onSelect('settings');}}>Settings</li>
+              <li onClick={() => {closeAndNotify('sheets');}}>Sheet</li>
+              <li onClick={() => {closeAndNotify('settings');}}>Settings</li>
             </ul></li>
           <li>ファイル
             <ul>
-              <li onClick={() => {setOpen(false);loadSheets();}}>Load</li>
-              <li onClick={() => {setOpen(false);saveSheets();}}>Save</li>
-              <li onClick={() => {setOpen(false);importRDF();}}>Import</li>
-              <li onClick={() => {setOpen(false);exportRDF();}}>Export</li>
+              <li onClick={() => {closeAndNotify('load');}}>Load</li>
+              <li onClick={() => {closeAndNotify('save');}}>Save</li>
+              <li onClick={() => {closeAndNotify('import');}}>Import</li>
+              <li onClick={() => {closeAndNotify('export');}}>Export</li>
             </ul></li>
           <li>その他
             <ul>
-              <li onClick={() => {setOpen(false);openHelp();}}>Help</li>
-              <li onClick={() => {setOpen(false);openAbout();}}>About</li>
+              <li onClick={() => {closeAndNotify('help');}}>Help</li>
+              <li onClick={() => {closeAndNotify('about');}}>About</li>
             </ul></li>
         </ul>
       </nav>

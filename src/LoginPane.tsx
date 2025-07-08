@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { myLogin, myLogout, webId as id, loadDefaultIdp } from './util';
+import MyDialog from './MyDialog';
 
 const LoginPane: React.FC = () => {
   const [ webId, setWebId ] = useState(id);
-  const [ dialogOpen, setDialogOpen ] = useState(false);
   const [ idp, setIdp ] = useState(loadDefaultIdp());
+  const [ dialogOpen, setDialogOpen ] = useState(false);
 
   const handleIdpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIdp(e.target.value);
@@ -20,18 +21,18 @@ const LoginPane: React.FC = () => {
   const processLogout: ()=>void = () => {
     myLogout();
     setWebId('not logged in');
-    setDialogOpen(false);
+    setDialogOpen(false); // MyDialog消すため。でもなぜか効果無し。
   };
 
   return (
     <>
       <p>WebID: {webId} <button onClick={()=>{setDialogOpen(true);}}>login or logout</button></p>
-      <dialog open={dialogOpen} style={{zIndex:3000}}>
+      <MyDialog isVisible={dialogOpen} setVisible={setDialogOpen}>
         <p>ダイアログ</p>
         <input type="text" value={idp} onChange={handleIdpChange} />
         <button onClick={processLogin}>Login</button>
         <button onClick={processLogout}>Logout</button>
-      </dialog>
+      </MyDialog>
     </>
   )
 }
