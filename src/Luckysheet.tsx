@@ -1,6 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { loadSheetsFromJSON } from './util';
 
+type RDFS = {
+  luckysheetfile: any;
+  settings: any;
+};
+
 const Luckysheet: React.FC = () => {
   const hasRun = useRef(false); // [注1]一番下にコメント
 
@@ -10,12 +15,14 @@ const Luckysheet: React.FC = () => {
 
     // とりあえず、localStorageにRDFSheetTempFileというキーがあって
     // そこにJSONデータがあれば、それを開くことにしておく。
-    let rdfs: any;
+    let rdfs: RDFS;
     try {
       const str = localStorage.getItem('RDFSheetTempFile');
       if (str) {
         rdfs = JSON.parse(str);
         localStorage.removeItem('RDFSheetTempFile');
+      } else {
+        rdfs = {luckysheetfile:undefined,settings:{}};
       }
     } catch(e) {
       rdfs = {luckysheetfile:undefined,settings:{}};

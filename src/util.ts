@@ -45,12 +45,12 @@ type RDFS = {
 };
 
 // JSONデータからRDFSheetファイルを開く
-export function loadSheetsFromJSON(json: any) {
+export function loadSheetsFromJSON(json: RDFS) {
   const options = {
     container: 'luckysheet',
-    data: json.luckysheetfile,
     //title: 'テスト', // showinfobar: falseの時は意味なし
     //lang: 'ja', // 日本語はまだ無理？zhだと中国語
+    data: undefined,
     showinfobar: false,
     showtoolbar: true, // ツールバー
     sheetFormulaBar: true, // 式を入力するバー
@@ -58,6 +58,8 @@ export function loadSheetsFromJSON(json: any) {
     showstatisticBar: true, // 下の方の統計とか拡大縮小を表示するバー
     // plugins: ['chart'] // 2025,06/26現在、chartは動かないっぽい。
   };
+  if (json.luckysheetfile)
+    options.data = json.luckysheetfile;
   luckysheet.create(options);
   settings = json.settings;
 }
@@ -74,7 +76,7 @@ export async function loadSheets(): Promise<void> {
     const [handle] = await (window as any).showOpenFilePicker(opts);
     const file = await handle.getFile();
     const text = await file.text();
-    const rdfs = JSON.parse(text);
+    const rdfs = (JSON.parse(text) as RDFS);
     loadSheetsFromJSON(rdfs);
   } catch(e) {
     alert('ファイルは開かれませんでした。');
@@ -116,7 +118,7 @@ export async function exportRDF(): Promise<void> {
 
 // ヘルプをオープン
 export function openHelp(): void {
-  const url = 'https://github.com/ksaito-hiu/RDFSheet/help/';
+  const url = 'https://github.com/ksaito-hiu/RDFSheet/tree/main/help';
   const opt = 'width=600,height=400,left=100,top=100,resizable=yes,scrollbars=yes';
   window.open(url,'help',opt);
 }
