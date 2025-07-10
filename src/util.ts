@@ -44,6 +44,24 @@ type RDFS = {
   settings: any;
 };
 
+// JSONデータからRDFSheetファイルを開く
+export function loadSheetsFromJSON(json: any) {
+  const options = {
+    container: 'luckysheet',
+    data: json.luckysheetfile,
+    //title: 'テスト', // showinfobar: falseの時は意味なし
+    //lang: 'ja', // 日本語はまだ無理？zhだと中国語
+    showinfobar: false,
+    showtoolbar: true, // ツールバー
+    sheetFormulaBar: true, // 式を入力するバー
+    showsheetbar: true, // 下の方のシートを選ぶバー
+    showstatisticBar: true, // 下の方の統計とか拡大縮小を表示するバー
+    // plugins: ['chart'] // 2025,06/26現在、chartは動かないっぽい。
+  };
+  luckysheet.create(options);
+  settings = json.settings;
+}
+
 // RDFSheetファイルを開く
 export async function loadSheets(): Promise<void> {
   try {
@@ -57,13 +75,7 @@ export async function loadSheets(): Promise<void> {
     const file = await handle.getFile();
     const text = await file.text();
     const rdfs = JSON.parse(text);
-    const options = {
-      container: 'luckysheet',
-      data: rdfs.luckysheetfile,
-      showinfobar: false,
-    };
-    luckysheet.create(options);
-    settings = rdfs.settings;
+    loadSheetsFromJSON(rdfs);
   } catch(e) {
     alert('ファイルは開かれませんでした。');
   }
