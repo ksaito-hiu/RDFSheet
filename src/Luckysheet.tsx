@@ -19,15 +19,20 @@ const Luckysheet: React.FC = () => {
     try {
       const str = localStorage.getItem('RDFSheetTempFile');
       if (str) {
+console.log("GAHA: JSON.parse start");
         rdfs = JSON.parse(str);
+console.log("GAHA: JSON.parse end");
         localStorage.removeItem('RDFSheetTempFile');
+console.log("GAHA: removeItem end");
       } else {
         rdfs = {luckysheetfile:undefined,settings:{}};
       }
     } catch(e) {
       rdfs = {luckysheetfile:undefined,settings:{}};
     }
+console.log("GAHA: loadSheetsFromJSON start");
     loadSheetsFromJSON(rdfs);
+console.log("GAHA: loadSheetsFromJSON end");
   }, []);
 
   const luckyCss = {
