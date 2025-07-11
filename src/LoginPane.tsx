@@ -21,13 +21,13 @@ const LoginPane: React.FC = () => {
   const processLogout: ()=>void = () => {
     myLogout();
     setWebId('not logged in');
-    setDialogOpen(false); // MyDialog消すため。でもなぜか効果無し。
+    setDialogOpen(false); // MyDialog消すため
   };
 
   return (
     <>
       <p>WebID: {webId} <button onClick={()=>{setDialogOpen(true);}}>login or logout</button></p>
-      <MyDialog isVisible={dialogOpen} setVisible={setDialogOpen}>
+      <MyDialog isVisible={dialogOpen} onClose={()=>setDialogOpen(false)}>
         <p>ダイアログ</p>
         <input type="text" value={idp} onChange={handleIdpChange} />
         <button onClick={processLogin}>Login</button>

@@ -40,12 +40,12 @@ const App: React.FC = () => {
 
   const processImport = () => {
     importRDF();
-    setImportOpen(false); // MyDialog消すため。でもなぜか効果無し。
+    setImportOpen(false); // MyDialog消すため
   };
 
   const processExport = () => {
     exportRDF();
-    setExportOpen(false); // MyDialog消すため。でもなぜか効果無し。
+    setExportOpen(false); // MyDialog消すため
   };
 
   return (
@@ -62,11 +62,11 @@ const App: React.FC = () => {
           <Settings/>
         </ToggleDiv>
       </main>
-      <MyDialog isVisible={isImportOpen} setVisible={setImportOpen}>
+      <MyDialog isVisible={isImportOpen} onClose={()=>setImportOpen(false)}>
         <p>ImportDialog</p>
         <button type="button" onClick={processImport}>import</button>
       </MyDialog>
-      <MyDialog isVisible={isExportOpen} setVisible={setExportOpen}>
+      <MyDialog isVisible={isExportOpen} onClose={()=>setExportOpen(false)}>
         <p>ExportDialog</p>
         <button type="button" onClick={processExport}>export</button>
       </MyDialog>
