@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loadSheets, saveSheets, importRDF, exportRDF, openHelp, openAbout } from './util';
+import { openHelp, openAbout } from './util';
 import './App.css';
 import LoginPane from './LoginPane';
 import Menu from './Menu';
@@ -7,10 +7,16 @@ import ToggleDiv from './ToggleDiv';
 import MyDialog from './MyDialog';
 import Luckysheet from './Luckysheet';
 import Settings from './Settings';
+import LoadComponent from './LoadComponent';
+import SaveComponent from './SaveComponent';
+import ImportComponent from './ImportComponent';
+import ExportComponent from './ExportComponent';
 
 const App: React.FC = () => {
   const [isSheetsActive, setSheetsActive] = useState(true);
   const [isSettingsActive, setSettingsActive] = useState(false);
+  const [isLoadOpen, setLoadOpen] = useState(false);
+  const [isSaveOpen, setSaveOpen] = useState(false);
   const [isImportOpen, setImportOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
 
@@ -22,9 +28,9 @@ const App: React.FC = () => {
       setSheetsActive(false);
       setSettingsActive(true);
     } else if (selected === 'load') {
-      loadSheets();
+      setLoadOpen(true);
     } else if (selected === 'save') {
-      saveSheets();
+      setSaveOpen(true);
     } else if (selected === 'import') {
       setImportOpen(true);
     } else if (selected === 'export') {
@@ -38,16 +44,6 @@ const App: React.FC = () => {
     }
   };
 
-  const processImport = () => {
-    importRDF();
-    setImportOpen(false); // MyDialog消すため
-  };
-
-  const processExport = () => {
-    exportRDF();
-    setExportOpen(false); // MyDialog消すため
-  };
-
   return (
     <>
       <header>
@@ -58,17 +54,23 @@ const App: React.FC = () => {
         <ToggleDiv isVisible={isSheetsActive} cName="sheets">
           <Luckysheet/>
         </ToggleDiv>
-        <ToggleDiv isVisible={isSettingsActive} cName="settings">
-          <Settings/>
-        </ToggleDiv>
+        { isSettingsActive === true ? (
+          <div className="settings">
+            <Settings/>
+          </div>
+        ) : null }
       </main>
+      <MyDialog isVisible={isLoadOpen} onClose={()=>setLoadOpen(false)}>
+        <LoadComponent onLoaded={()=>setLoadOpen(false)}/>
+      </MyDialog>
+      <MyDialog isVisible={isSaveOpen} onClose={()=>setSaveOpen(false)}>
+        <SaveComponent onSaved={()=>setSaveOpen(false)}/>
+      </MyDialog>
       <MyDialog isVisible={isImportOpen} onClose={()=>setImportOpen(false)}>
-        <p>ImportDialog</p>
-        <button type="button" onClick={processImport}>import</button>
+        <ImportComponent onImported={()=>setImportOpen(false)}/>
       </MyDialog>
       <MyDialog isVisible={isExportOpen} onClose={()=>setExportOpen(false)}>
-        <p>ExportDialog</p>
-        <button type="button" onClick={processExport}>export</button>
+        <ExportComponent onExported={()=>setExportOpen(false)}/>
       </MyDialog>
     </>
   )

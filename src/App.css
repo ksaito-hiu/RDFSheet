@@ -30,7 +30,7 @@ main {
 
 .settings {
   width: 100vw;
-  height: 100%;
+  height: 95%; /* 100% ??? */
 }
 
 .s_logged_in, s_logged_out {

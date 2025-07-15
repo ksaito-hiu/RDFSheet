@@ -1,5 +1,7 @@
-//import { handleIncomingRedirect, login, logout } from '@inrupt/solid-client-authn-browser';
-const  { handleIncomingRedirect, login, logout } = (window as any).solidClientAuthentication;
+//import { handleIncomingRedirect, login, logout, authFetch } from '@inrupt/solid-client-authn-browser';
+const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidClientAuthentication;
+
+//export const authFetch = fetch;
 
 const localStorage = (window as any).localStorage;
 
@@ -18,6 +20,7 @@ export const myLogin = async (idp: string) => {
     oidcIssuer: idp
   });
 };
+
 export const myLogout = () => {
   logout();
 };
@@ -37,7 +40,9 @@ export async function updateLoginStatus() {
 }
 
 const luckysheet = (window as any).luckysheet;
-let settings = {};
+export const settingsContainer = {
+  settings: {}
+};
 
 type RDFS = {
   luckysheetfile: any;
@@ -61,11 +66,11 @@ export function loadSheetsFromJSON(json: RDFS) {
   if (json.luckysheetfile)
     options.data = json.luckysheetfile;
   luckysheet.create(options);
-  settings = json.settings;
+  settingsContainer.settings = json.settings;
 }
 
-// RDFSheetファイルを開く
-export async function loadSheets(): Promise<void> {
+// ローカルのファイルからRDFSheetファイルを開く
+export async function loadSheetsFromLocal(): Promise<void> {
   try {
     const opts = {
       types: [{
@@ -83,12 +88,23 @@ export async function loadSheets(): Promise<void> {
   }
 }
 
-// RDFSheetファイルの保存
-export async function saveSheets(): Promise<void> {
+// PodからRDFSheetファイルを開く
+export async function loadSheetsFromPod(podUrl: string): Promise<void> {
+  try {
+    const res = await fetch(podUrl);
+    const json = await res.json();
+    loadSheetsFromJSON(json);
+  } catch(e) {
+    alert(`ファイルの読み込みに失敗しました。`);
+  }
+}
+
+// ローカルのファイルにRDFSheetファイルを保存
+export async function saveSheetsToLocal(): Promise<void> {
   try {
     const rdfs: RDFS = {
       luckysheetfile: luckysheet.getluckysheetfile(),
-      settings: JSON.parse(JSON.stringify(settings))
+      settings: JSON.parse(JSON.stringify(settingsContainer.settings))
     };
     const opts = {
       suggestedName: 'rdfsheetfile.rdfs',
@@ -106,14 +122,43 @@ export async function saveSheets(): Promise<void> {
   }
 }
 
-// RDFファイルの読み込み
-export async function importRDF(): Promise<void> {
+// PodにRDFSheetファイルを保存
+export async function saveSheetsToPod(podUrl: string): Promise<void> {
+  try {
+    const rdfs: RDFS = {
+      luckysheetfile: luckysheet.getluckysheetfile(),
+      settings: JSON.parse(JSON.stringify(settingsContainer.settings))
+    };
+    await fetch(podUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/x-rdfsheet+json',
+        body: JSON.stringify(rdfs)
+      }
+    });
+  } catch(e) {
+    alert(`ファイルの保存に失敗しました。`);
+  }
+}
+
+// ローカルのファイルからRDFファイルの読み込み
+export async function importRDFFromLocal(): Promise<void> {
+  alert('importRDFFromLocal!');
+}
+
+// ローカルのファイルからRDFファイルの読み込み
+export async function importRDFFromPod(podUrl: string): Promise<void> {
+  alert(`importRDFFromPod! url=${podUrl}`);
+}
+
+// ローカルのファイルにRDFを書き出し
+export async function exportRDFToLocal(): Promise<void> {
   alert('importRDF!');
 }
 
-// RDFファイルの書き出し
-export async function exportRDF(): Promise<void> {
-  alert('exportRDF!');
+// PodにRDFファイルをアップロード
+export async function exportRDFToPod(podUrl: string): Promise<void> {
+  alert(`exportRDFToPod! url=${podUrl}`);
 }
 
 // ヘルプをオープン
