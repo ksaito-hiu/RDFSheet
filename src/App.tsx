@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { openHelp, openAbout } from './util';
+import { openHelp, openAbout, updateSettings } from './util';
+import type { Setting } from './util';
 import './App.css';
 import LoginPane from './LoginPane';
 import Menu from './Menu';
@@ -13,6 +14,7 @@ import ImportComponent from './ImportComponent';
 import ExportComponent from './ExportComponent';
 
 const App: React.FC = () => {
+  const [settings, setSettings] = useState<Setting[]>([]);
   const [isSheetsActive, setSheetsActive] = useState(true);
   const [isSettingsActive, setSettingsActive] = useState(false);
   const [isLoadOpen, setLoadOpen] = useState(false);
@@ -25,6 +27,7 @@ const App: React.FC = () => {
       setSheetsActive(true);
       setSettingsActive(false);
     } else if (selected === 'settings') {
+      setSettings(updateSettings());
       setSheetsActive(false);
       setSettingsActive(true);
     } else if (selected === 'load') {
@@ -56,7 +59,7 @@ const App: React.FC = () => {
         </ToggleDiv>
         { isSettingsActive === true ? (
           <div className="settings">
-            <Settings/>
+            <Settings settings={settings}/>
           </div>
         ) : null }
       </main>

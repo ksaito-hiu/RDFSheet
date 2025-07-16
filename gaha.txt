@@ -1,0 +1,22 @@
+
+> rdfsheet@0.0.0 build
+> tsc -b && vite build
+
+vite v6.3.5 building for production...
+transforming...
+✓ 42 modules transformed.
+rendering chunks...
+computing gzip size...
+docs/registerSW.js                0.15 kB
+docs/manifest.webmanifest         0.44 kB
+docs/index.html                   1.84 kB │ gzip:  0.71 kB
+docs/assets/index-BAuuVSBq.css    1.61 kB │ gzip:  0.75 kB
+docs/assets/index-BKiO7nsx.js   195.91 kB │ gzip: 61.65 kB
+✓ built in 721ms
+
+PWA v1.0.0
+mode      generateSW
+precache  9 entries (655.05 KiB)
+files generated
+  docs/sw.js
+  docs/workbox-5ffe50d4.js

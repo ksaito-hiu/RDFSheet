@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { loadSheetsFromJSON } from './util';
+import type { Setting } from './util';
 
 type RDFS = {
   luckysheetfile: any;
-  settings: any;
+  settings: Setting[];
 };
 
 const Luckysheet: React.FC = () => {
@@ -22,10 +23,10 @@ const Luckysheet: React.FC = () => {
         rdfs = JSON.parse(str);
         localStorage.removeItem('RDFSheetTempFile');
       } else {
-        rdfs = {luckysheetfile:undefined,settings:{}};
+        rdfs = {luckysheetfile:undefined,settings:[]};
       }
     } catch(e) {
-      rdfs = {luckysheetfile:undefined,settings:{}};
+      rdfs = {luckysheetfile:undefined,settings:[]};
     }
     loadSheetsFromJSON(rdfs);
   }, []);

@@ -40,8 +40,40 @@ export async function updateLoginStatus() {
 }
 
 const luckysheet = (window as any).luckysheet;
-export const settingsContainer = {
-  settings: {}
+
+export type Setting = {
+  index: string | number; // こうなのよ
+  name: string;
+  status: string | number; // "0"か"1"か0か1なんだけどね
+};
+
+export const settingsContainer: { settings: Setting[] } = {
+  settings: []
+};
+
+// luckysheetを調べて設定データを更新する。
+// luckysheetにシートの更新を検知する機能が無いので、
+// Settingsコンポーネントが表示されるタイミングで、
+// これが実行される。
+export const updateSettings: ()=>Setting[] = () => {
+  const sheets = (luckysheet.getAllSheets() as Setting[]);
+  const oldSettings: Setting[] = settingsContainer.settings;
+  const newSettings: Setting[] = [];
+  sheets.forEach((sheet) => {
+    const oldSetting: Setting | null = oldSettings.reduce(
+      (acc: Setting | null,cur) => acc?acc:(cur.index===sheet.index?cur:acc),
+      null
+    );
+    if (oldSetting !== null) {
+      oldSetting.name = sheet.name;
+      oldSetting.status = sheet.status;
+      newSettings.push(oldSetting);
+    } else {
+      newSettings.push({index:sheet.index, name: sheet.name, status: sheet.status});
+    }
+  });
+  settingsContainer.settings = newSettings;
+  return newSettings;
 };
 
 type RDFS = {
