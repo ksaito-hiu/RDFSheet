@@ -41,11 +41,36 @@ export async function updateLoginStatus() {
 
 const luckysheet = (window as any).luckysheet;
 
+/*
+ * シートのタイプは「反復埋め込み」と「単純埋め込み」の2種類。
+ */
+export type SheetType = 'repetitive-embedding' | 'simple-embedding';
+
 export type Setting = {
-  index: string | number; // こうなのよ
+  index: string; // LuckySheetがnumber返してきたら文字列にする。本当はあぶない？
   name: string;
-  status: string | number; // "0"か"1"か0か1なんだけどね
+  status: number; // 実際には0か1。LuckySheetが"0"か"1"返した時には変換する
+  sheetType: SheetType;
+  repRange: string;
+  prefixes: string;
+  template: string;
+  fileURL: string;
+  rdfURL: string;
 };
+
+export const makeDummySetting: ()=>Setting = () => {
+  return {
+    index: 'iTha4zah', // 適当
+    name: '??????????',
+    status: 0,
+    sheetType: 'repetitive-embedding',
+    repRange: 'gaha1',
+    prefixes: 'gaha2',
+    template: 'gaha3:'+Math.random(),
+    fileURL: 'gaha4',
+    rdfURL: 'gaha5'
+  };
+}
 
 export const settingsContainer: { settings: Setting[] } = {
   settings: []
@@ -54,24 +79,31 @@ export const settingsContainer: { settings: Setting[] } = {
 // luckysheetを調べて設定データを更新する。
 // luckysheetにシートの更新を検知する機能が無いので、
 // Settingsコンポーネントが表示されるタイミングで、
-// これが実行される。
+// これが実行される。あと、ファイルなどから読み込んだ
+// 時にも実行することにした。
 export const updateSettings: ()=>Setting[] = () => {
+console.log(`GAHA1: settings=${JSON.stringify(settingsContainer.settings,null,2)}`);
   const sheets = (luckysheet.getAllSheets() as Setting[]);
   const oldSettings: Setting[] = settingsContainer.settings;
   const newSettings: Setting[] = [];
   sheets.forEach((sheet) => {
     const oldSetting: Setting | null = oldSettings.reduce(
-      (acc: Setting | null,cur) => acc?acc:(cur.index===sheet.index?cur:acc),
+      (acc: Setting | null,cur) => acc?acc:(cur.index===(sheet.index).toString()?cur:acc),
       null
     );
     if (oldSetting !== null) {
       oldSetting.name = sheet.name;
-      oldSetting.status = sheet.status;
+      oldSetting.status = Number(sheet.status);
       newSettings.push(oldSetting);
     } else {
-      newSettings.push({index:sheet.index, name: sheet.name, status: sheet.status});
+      const s = makeDummySetting();
+      s.index = (sheet.index).toString();
+      s.name = sheet.name;
+      s.status = Number(sheet.status);
+      newSettings.push(s);
     }
   });
+console.log(`GAHA2: settings=${JSON.stringify(settingsContainer.settings,null,2)}`);
   settingsContainer.settings = newSettings;
   return newSettings;
 };
@@ -93,12 +125,15 @@ export function loadSheetsFromJSON(json: RDFS) {
     sheetFormulaBar: true, // 式を入力するバー
     showsheetbar: true, // 下の方のシートを選ぶバー
     showstatisticBar: true, // 下の方の統計とか拡大縮小を表示するバー
-    // plugins: ['chart'] // 2025,06/26現在、chartは動かないっぽい。
+    // plugins: ['chart'], // 2025,06/26現在、chartは動かないっぽい。
   };
   if (json.luckysheetfile)
     options.data = json.luckysheetfile;
+  if (json.settings)
+    settingsContainer.settings = json.settings;
   luckysheet.create(options);
-  settingsContainer.settings = json.settings;
+  updateSettings();
+  //settingsContainer.settings = json.settings;
 }
 
 // ローカルのファイルからRDFSheetファイルを開く

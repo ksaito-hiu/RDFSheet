@@ -8,15 +8,15 @@ type Props = {
 const LoadComponent: React.FC<Props> = ({ onLoaded }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const processLoadFromLocal = () => {
-    loadSheetsFromLocal();
+  const processLoadFromLocal = async () => {
+    await loadSheetsFromLocal();
     onLoaded();
   };
 
-  const processLoadFromPod = () => {
+  const processLoadFromPod = async () => {
     if (!(inputRef.current)) return;
     const url = inputRef.current.value;
-    loadSheetsFromPod(url);
+    await loadSheetsFromPod(url);
     onLoaded();
   };
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { openHelp, openAbout, updateSettings } from './util';
+import { openHelp, openAbout, updateSettings, settingsContainer } from './util';
 import type { Setting } from './util';
 import './App.css';
 import LoginPane from './LoginPane';
@@ -55,16 +55,16 @@ const App: React.FC = () => {
       </header>
       <main>
         <ToggleDiv isVisible={isSheetsActive} cName="sheets">
-          <Luckysheet/>
+          <Luckysheet onLoad={(ss)=>setSettings(ss)}/>
         </ToggleDiv>
         { isSettingsActive === true ? (
           <div className="settings">
-            <Settings settings={settings}/>
+            <Settings settings={settings} onChange={(ss)=>setSettings(ss)}/>
           </div>
         ) : null }
       </main>
       <MyDialog isVisible={isLoadOpen} onClose={()=>setLoadOpen(false)}>
-        <LoadComponent onLoaded={()=>setLoadOpen(false)}/>
+        <LoadComponent onLoaded={()=>{setLoadOpen(false);setSettings(settingsContainer.settings);}}/>
       </MyDialog>
       <MyDialog isVisible={isSaveOpen} onClose={()=>setSaveOpen(false)}>
         <SaveComponent onSaved={()=>setSaveOpen(false)}/>

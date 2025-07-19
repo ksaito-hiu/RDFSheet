@@ -1,13 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import { loadSheetsFromJSON } from './util';
+import { loadSheetsFromJSON, updateSettings } from './util';
 import type { Setting } from './util';
+
+type Props = {
+  onLoad: (ss: Setting[]) => void;
+};
 
 type RDFS = {
   luckysheetfile: any;
   settings: Setting[];
 };
 
-const Luckysheet: React.FC = () => {
+const Luckysheet: React.FC<Props> = ({ onLoad }) => {
   const hasRun = useRef(false); // [注1]一番下にコメント
 
   useEffect(() => {
@@ -29,6 +33,8 @@ const Luckysheet: React.FC = () => {
       rdfs = {luckysheetfile:undefined,settings:[]};
     }
     loadSheetsFromJSON(rdfs);
+    updateSettings();
+    onLoad(rdfs.settings);
   }, []);
 
   const luckyCss = {
