@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MyDialog from './MyDialog';
+import AppSettings from './AppSettings';
 import type { SheetType, Setting } from './util';
 
 /*
@@ -32,7 +33,6 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
   const [ sheetRdfURL, setSheetRdfURL ] = useState('');
 
   useEffect(() => {
-console.log(`GAHA0000000000000: ${JSON.stringify(settings,null,2)}`);
     const selected: string | null = settings.reduce(
       (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.index:acc),
       null
@@ -101,7 +101,8 @@ console.log(`GAHA0000000000000: ${JSON.stringify(settings,null,2)}`);
     <>
       <h3>Settings</h3><button onClick={()=>setAppSettingsOpen(true)}>アプリ設定</button>
       <MyDialog isVisible={isAppSettingsOpen} onClose={()=>setAppSettingsOpen(false)}>
-        <p>アプリ設定。未完！</p>
+        <AppSettings onChanged={()=>setAppSettingsOpen(false)}/>
+        <p>dummy</p>
       </MyDialog>
       <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
         {settings.map((setting) => (

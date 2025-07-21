@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { openHelp, openAbout, updateSettings, settingsContainer } from './util';
 import type { Setting } from './util';
 import './App.css';
+import { AppDataProvider } from './AppDataContext';
 import LoginPane from './LoginPane';
 import Menu from './Menu';
 import ToggleDiv from './ToggleDiv';
@@ -48,7 +49,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <AppDataProvider>
       <header>
         <Menu onSelect={selectedListener} />
         <LoginPane/>
@@ -75,7 +76,7 @@ const App: React.FC = () => {
       <MyDialog isVisible={isExportOpen} onClose={()=>setExportOpen(false)}>
         <ExportComponent onExported={()=>setExportOpen(false)}/>
       </MyDialog>
-    </>
+    </AppDataProvider>
   )
 }
 

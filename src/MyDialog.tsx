@@ -16,20 +16,18 @@ const MyDialog: React.FC<Props> = ({ isVisible, onClose, children }) => {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    dialog.addEventListener('close', handleClose);
-    return ()=>dialog.removeEventListener('close', handleClose);
-  },[]);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (isVisible)
-      if (!dialog.open)
+    if (isVisible) {
+      if (!dialog.open) {
         dialog.showModal();
-    else
-      if (dialog.open)
+        dialog.addEventListener('close', handleClose);
+      }
+    } else {
+      if (dialog.open) {
+        dialog.removeEventListener('close', handleClose);
         dialog.close();
+      }
+    }
   },[isVisible]);
 
   return (isVisible ?

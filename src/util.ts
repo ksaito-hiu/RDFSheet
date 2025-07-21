@@ -3,19 +3,7 @@ const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidC
 
 //export const authFetch = fetch;
 
-const localStorage = (window as any).localStorage;
-
-const RDFSheetLocalStorageKey = 'RDFSheetLocalStorageKey';
-const saveDefaultIdp = (idp: string) => {
-  localStorage.setItem(RDFSheetLocalStorageKey,idp);
-}
-export const loadDefaultIdp = () => {
-  const idp = localStorage.getItem(RDFSheetLocalStorageKey);
-  return idp ? idp : 'https://solidcommunity.net';
-}
-
 export const myLogin = async (idp: string) => {
-  saveDefaultIdp(idp); // ログイン前だけどこのタイミングしか・・・
   await login({
     oidcIssuer: idp
   });
@@ -82,7 +70,6 @@ export const settingsContainer: { settings: Setting[] } = {
 // これが実行される。あと、ファイルなどから読み込んだ
 // 時にも実行することにした。
 export const updateSettings: ()=>Setting[] = () => {
-console.log(`GAHA1: settings=${JSON.stringify(settingsContainer.settings,null,2)}`);
   const sheets = (luckysheet.getAllSheets() as Setting[]);
   const oldSettings: Setting[] = settingsContainer.settings;
   const newSettings: Setting[] = [];
@@ -103,7 +90,6 @@ console.log(`GAHA1: settings=${JSON.stringify(settingsContainer.settings,null,2)
       newSettings.push(s);
     }
   });
-console.log(`GAHA2: settings=${JSON.stringify(settingsContainer.settings,null,2)}`);
   settingsContainer.settings = newSettings;
   return newSettings;
 };
