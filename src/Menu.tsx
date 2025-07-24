@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Menu.css';
+import styles from './Menu.module.css';
 
 type Props = {
   onSelect: (selected: string) => void;
@@ -14,9 +14,9 @@ const Menu: React.FC<Props> = ({ onSelect }) => {
   };
 
   return(
-    <div className="menu_div">
-      <button className="hamburger" onClick={() => setOpen(!open)}>{open?"×":"☰"}</button>
-      <nav className={`menu ${open ? "open" : ""}`}>
+    <div className={styles.menu_div}>
+      <button className={styles.hamburger} onClick={() => setOpen(!open)}>{open?"×":"☰"}</button>
+      <nav className={open ? styles.menu_open : styles.menu_close}>
         <ul>
           <li>画面切り替え
             <ul>

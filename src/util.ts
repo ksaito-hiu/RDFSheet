@@ -227,3 +227,36 @@ export function openAbout(): void {
   const opt = 'width=600,height=400,left=100,top=100,resizable=yes,scrollbars=yes';
   window.open(url,'about',opt);
 }
+
+// 
+export const columnNumToAlphabet = (idx: number) => {
+  let ret = '';
+  let tmp = idx;
+  do {
+    const remainder = tmp % 25;
+    tmp = Math.floor(tmp / 25);
+    ret = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(remainder) + ret;
+  } while (tmp > 0);
+  return ret;
+};
+
+// アクティブなシートの選択されている範囲を返す。
+// 範囲だけでなく、どのシートがアクティブかも返す。
+// なので、返り値の型は{ range: string, sheetIdx: string }。
+// マウスでの選択は複数可能なんだけど、最初に選択された
+// 範囲を返すことにする。
+export const getSelectedRange = () => {
+  const rs = luckysheet.getRangeAxis();
+  const ss = luckysheet.getAllSheets();
+  let idx;
+  for (const s of ss) {
+    if (Number(s.status) === 1) {
+      idx = (s.index).toString();
+    }
+  }
+  
+  return {
+    range: rs[0],
+    sheetIdx: idx
+  };
+}

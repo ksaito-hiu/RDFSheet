@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import styles from './Settings.module.css';
 import MyDialog from './MyDialog';
 import AppSettings from './AppSettings';
+import { getSelectedRange } from './util';
 import type { SheetType, Setting } from './util';
+import { useAppData } from './AppDataContext';
 
 /*
  * 設定画面のコンポーネント。デフォルトでLuckySheetのUIが
@@ -23,6 +26,7 @@ type Props = {
 
 const Settings: React.FC<Props> = ({ settings, onChange }) => {
   const [ isAppSettingsOpen, setAppSettingsOpen ] = useState(false);
+  const [ isImportPrefixOpen, setImportPrefixOpen ] = useState(false);
   const [ currentSheet, setCurrentSheet ] = useState(settings[0]);
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
   const [ sheetType, setSheetType ] = useState<SheetType>('repetitive-embedding');
@@ -31,6 +35,7 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
   const [ sheetTemplate, setSheetTemplate ] = useState('');
   const [ sheetFileURL, setSheetFileURL ] = useState('');
   const [ sheetRdfURL, setSheetRdfURL ] = useState('');
+  const { appData, /* updateAppData */ } = useAppData();
 
   useEffect(() => {
     const selected: string | null = settings.reduce(
@@ -97,48 +102,89 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
     onChange(settings);
   }
 
+  const importPrefix = () => {
+    const selected = getSelectedRange();
+    if (selected.sheetIdx !== sheetIdx) {
+      alert(`設定中のシートと、現在アクティブなシートが異なっているので取り込みを中止します。`);
+      return;
+    }
+    if (selected.range.indexOf(':')<0) {
+      alert(`範囲が選択されていなかったので取り込みを中止します。`);
+      return;
+    }
+    setSheetRepRange(selected.range);
+  };
+
   return(
-    <>
-      <h3>Settings</h3><button onClick={()=>setAppSettingsOpen(true)}>アプリ設定</button>
+    <div className={styles.allSettings}>
+      <div className={styles.title}>
+        <span>Settings</span>
+        <span className={styles.glue}> </span>
+        <button onClick={()=>setAppSettingsOpen(true)}>アプリ設定</button>
+      </div>
       <MyDialog isVisible={isAppSettingsOpen} onClose={()=>setAppSettingsOpen(false)}>
         <AppSettings onChanged={()=>setAppSettingsOpen(false)}/>
         <p>dummy</p>
       </MyDialog>
-      <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
-        {settings.map((setting) => (
-          <option value={setting.index} key={setting.index}>{setting.name}</option>
-        ))}
-      </select>
-      <div>
-        <div>
-          <input type="radio"
-                 name="sheetType"
-                 value="repetitive-embedding"
-                 checked={sheetType==='repetitive-embedding'}
-                 onChange={changeSheetType}/>反復埋め込み
-          範囲: <input type="text" value={sheetRepRange} onChange={changeSheetRepRange}/>
+      <label>設定するシート: 
+        <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
+          {settings.map((setting) => (
+            <option value={setting.index} key={setting.index}>{setting.name}</option>
+          ))}
+        </select>
+      </label>
+      <div className={styles.typeSelect}>
+        <div className={styles.sheetType}>
+          <label>
+            <input id="sheetTypeTI"
+                   type="radio"
+                   name="sheetType"
+                   value="repetitive-embedding"
+                   checked={sheetType==='repetitive-embedding'}
+                   onChange={changeSheetType}/>反復埋め込み
+            <div className={styles.repRangeDiv}>
+              反復範囲:
+              <input type="text" value={sheetRepRange} onChange={changeSheetRepRange}/>
+              <button type="button" onClick={importPrefix}>選択範囲から取り込み</button>
+            </div>
+          </label>
         </div>
-        <div>
-          <input type="radio"
-                 name="sheetType"
-                 value="simple-embedding"
-                 checked={sheetType==='simple-embedding'}
-                 onChange={changeSheetType}/>単純埋め込み
+        <div className={styles.simpleType}>
+          <label>
+            <input type="radio"
+                   name="sheetType"
+                   value="simple-embedding"
+                   checked={sheetType==='simple-embedding'}
+                   onChange={changeSheetType}/>単純埋め込み
+          </label>
         </div>
       </div>
-      <div>
-        <p>プレフィックス</p>
-        <textarea value={sheetPrefixes} onChange={changeSheetPrefixes}/>
+      <div className={styles.prefixDiv}>
+        <h4>
+          プレフィックス
+          <span className={styles.glue}></span>
+          <button id="importPrefixBtn"
+                  className={styles.importPrefixBtn}
+                  onClick={()=>setImportPrefixOpen(true)}>プレフィックスを取り込む</button>
+          <MyDialog isVisible={isImportPrefixOpen} onClose={()=>setImportPrefixOpen(false)}>
+            <p>取り込みたいプレフィックスをクリックして下さい。</p>
+            {Object.keys(appData.prefixes).map((key) => {
+              return <p>{key}: {appData.prefixes[key]}</p>;
+            })}
+            <pre>{JSON.stringify(appData,null,2)}</pre>
+          </MyDialog>
+        </h4>
+        <textarea value={sheetPrefixes} onChange={changeSheetPrefixes} className={styles.prefixTA}/>
       </div>
       <div>
-        <p>テンプレート</p>
-        <textarea value={sheetTemplate} onChange={changeSheetTemplate}/>
+        <h4>テンプレート</h4>
+        <textarea value={sheetTemplate} onChange={changeSheetTemplate} className={styles.templateTA}/>
       </div>
-      <div>
-        <p>ファイルURL: <input type="text" value={sheetFileURL} onChange={changeSheetFileURL}/></p>
-        <p>RDF URL: <input type="text" value={sheetRdfURL} onChange={changeSheetRdfURL}/></p>
+      <div className={styles.pathDiv}>
+        <label htmlFor="fileURLTB">ファイルURL</label><input id="fileURLTB" type="text" value={sheetFileURL} onChange={changeSheetFileURL}/>
+        <label htmlFor="rdfURLTB">RDF URL</label><input id="rdfURLTB" type="text" value={sheetRdfURL} onChange={changeSheetRdfURL}/>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,0 +1,97 @@
+/* Settings.module.css */
+
+.allSettings {
+    width: 95%;
+    height: 95%; /* 100% ??? */
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.allSettings button {
+    margin: 0.3em;
+    padding: 0.1em 0.3em;
+    background: lightgray;
+    border-radius: 2px;
+}
+
+.allSettings h4 {
+    margin: 0.2em;
+    padding: 0.2em;
+}
+
+.title {
+    display: flex;
+    flex-direction: row;
+    font-size: 2rem;
+}
+
+.glue {
+    flex-grow: 1;
+}
+
+.title button {
+    font-size: 1rem;
+}
+
+.typeSelect {
+    display: flex;
+}
+
+.sheetType {
+    display: flex;
+    flex-direction: column;
+    border: solid;
+    margin: 0.3em;
+    padding: 0.3em;
+    flex-grow: 1;
+}
+
+.repRangeDiv {
+    
+}
+
+.simpleType {
+    display: flex;
+    flex-direction: column;
+    border: solid;
+    margin: 0.3em;
+    padding: 0.3em;
+    flex-grow: 1;
+}
+
+.simpleType label {
+    width: 100%;
+    height: 100%;
+}
+
+.prefixDiv {
+}
+
+.prefixTA {
+    display: block;
+    width: 98%;
+    height: 3em;
+    margin: auto;
+}
+
+.importPrefixBtn {
+
+}
+
+.templateTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.pathDiv {
+    display: grid;
+    grid-template-columns: 10em 1fr;
+    gap: 0.5rem;
+    margin: 1rem;
+}
+
+.pathDiv label {
+    text-align: right;
+}

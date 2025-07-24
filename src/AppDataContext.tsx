@@ -23,7 +23,7 @@ type AppDataContextType = {
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
 
 export const AppDataProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [appData, setAppData ] = useState<AppData | null>(null);
+  const [appData, setAppData ] = useState<AppData>({prefixes:{},idp:'none'});
 
   useEffect(()=>{
     const saved = localStorage.getItem(RDFSheetLocalStorageKey);

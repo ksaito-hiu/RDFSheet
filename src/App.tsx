@@ -55,13 +55,11 @@ const App: React.FC = () => {
         <LoginPane/>
       </header>
       <main>
-        <ToggleDiv isVisible={isSheetsActive} cName="sheets">
+        <ToggleDiv isVisible={isSheetsActive}>
           <Luckysheet onLoad={(ss)=>setSettings(ss)}/>
         </ToggleDiv>
         { isSettingsActive === true ? (
-          <div className="settings">
-            <Settings settings={settings} onChange={(ss)=>setSettings(ss)}/>
-          </div>
+          <Settings settings={settings} onChange={(ss)=>setSettings(ss)}/>
         ) : null }
       </main>
       <MyDialog isVisible={isLoadOpen} onClose={()=>setLoadOpen(false)}>
