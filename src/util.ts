@@ -40,6 +40,7 @@ export type Setting = {
   status: number; // 実際には0か1。LuckySheetが"0"か"1"返した時には変換する
   sheetType: SheetType;
   repRange: string;
+  convFuncs: {in:string,out:string}[][];
   prefixes: string;
   template: string;
   fileURL: string;
@@ -53,6 +54,7 @@ export const makeDummySetting: ()=>Setting = () => {
     status: 0,
     sheetType: 'repetitive-embedding',
     repRange: '',
+    convFuncs: [],
     prefixes: '',
     template: '',
     fileURL: 'https://example.org/my_pod/rdfsheet.rdfs',

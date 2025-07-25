@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Settings.module.css';
 import MyDialog from './MyDialog';
-import AppSettings from './AppSettings';
 import { getSelectedRange } from './util';
 import type { SheetType, Setting } from './util';
 import { useAppData } from './AppDataContext';
@@ -25,17 +24,17 @@ type Props = {
 };
 
 const Settings: React.FC<Props> = ({ settings, onChange }) => {
-  const [ isAppSettingsOpen, setAppSettingsOpen ] = useState(false);
   const [ isImportPrefixOpen, setImportPrefixOpen ] = useState(false);
-  const [ currentSheet, setCurrentSheet ] = useState(settings[0]);
+  const [ currentSheet, setCurrentSheet ] = useState<Setting>(settings[0]);
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
   const [ sheetType, setSheetType ] = useState<SheetType>('repetitive-embedding');
-  const [ sheetRepRange, setSheetRepRange ] = useState('');
-  const [ sheetPrefixes, setSheetPrefixes ] = useState('');
-  const [ sheetTemplate, setSheetTemplate ] = useState('');
-  const [ sheetFileURL, setSheetFileURL ] = useState('');
-  const [ sheetRdfURL, setSheetRdfURL ] = useState('');
-  const { appData, /* updateAppData */ } = useAppData();
+  const [ sheetSettingsChanged, setSheetSettingsChanged ] = useState(false);
+  const sheetRepRangeTB = useRef<HTMLInputElement>(null);
+  const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
+  const sheetTemplateTA = useRef<HTMLTextAreaElement>(null);
+  const sheetFileURLTB = useRef<HTMLInputElement>(null);
+  const sheetRdfURLTB = useRef<HTMLInputElement>(null);
+  const { appData } = useAppData();
 
   useEffect(() => {
     const selected: string | null = settings.reduce(
@@ -46,6 +45,11 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
   }, [settings]);
 
   const changeSelectedSheet = (idx: string | null) => {
+    if (sheetSettingsChanged)
+      if (!(window.confirm("設定を保存せずにシートを変更しますか？")))
+        return;
+
+    setSheetSettingsChanged(false);
     const selected: Setting | null = settings.reduce(
       (acc: Setting | null, cur: Setting) => acc!==null?acc:((cur.index===idx)?cur:acc),
       null
@@ -54,53 +58,21 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
       setCurrentSheet(selected);
       setSheetIdx(selected.index);
       setSheetType(selected.sheetType);
-      setSheetRepRange(selected.repRange);
-      setSheetPrefixes(selected.prefixes);
-      setSheetTemplate(selected.template);
-      setSheetFileURL(selected.fileURL);
-      setSheetRdfURL(selected.rdfURL);
+      if (sheetRepRangeTB.current) sheetRepRangeTB.current.value = selected.repRange;
+      if (sheetPrefixesTA.current) sheetPrefixesTA.current.value = selected.prefixes;
+      if (sheetTemplateTA.current) sheetTemplateTA.current.value = selected.template;
+      if (sheetFileURLTB.current) sheetFileURLTB.current.value = selected.fileURL;
+      if (sheetRdfURLTB.current) sheetRdfURLTB.current.value = selected.rdfURL;
     } else {
       console.log(`GAHA: There is no sheet: index=${idx}???`);
     }
     
   };
 
-  const changeSheetType = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const t = e.target.value as SheetType;
-    currentSheet.sheetType = t;
-    setSheetType(t);
-    onChange(settings);
-  }
-
-  const changeSheetRepRange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    currentSheet.repRange = e.target.value;
-    setSheetRepRange(e.target.value);
-    onChange(settings);
-  }
-
-  const changeSheetPrefixes = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    currentSheet.prefixes = e.target.value;
-    setSheetPrefixes(e.target.value);
-    onChange(settings);
-  }
-
-  const changeSheetTemplate = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    currentSheet.template = e.target.value;
-    setSheetTemplate(e.target.value);
-    onChange(settings);
-  }
-
-  const changeSheetFileURL = (e: React.ChangeEvent<HTMLInputElement>) => {
-    currentSheet.fileURL = e.target.value;
-    setSheetFileURL(e.target.value);
-    onChange(settings);
-  }
-
-  const changeSheetRdfURL = (e: React.ChangeEvent<HTMLInputElement>) => {
-    currentSheet.rdfURL = e.target.value;
-    setSheetRdfURL(e.target.value);
-    onChange(settings);
-  }
+  const handleSheetTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSheetType((event.target.value as SheetType));
+    setSheetSettingsChanged(true);
+  };
 
   const importRepRange = () => {
     const selected = getSelectedRange();
@@ -112,43 +84,58 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
       alert(`範囲が選択されていなかったので取り込みを中止します。`);
       return;
     }
-    setSheetRepRange(selected.range);
+    if (sheetRepRangeTB.current) sheetRepRangeTB.current.value = selected.range;
+    setSheetSettingsChanged(true);
   };
+
   const importPrefix = (e: any) => {
-console.log(`GAHA: `,e.target.textContent);
-    setSheetPrefixes(sheetPrefixes+e.target.textContent);
+    if (!(sheetPrefixesTA.current)) return;
+    if (!(sheetPrefixesTA.current.value.endsWith('\n')))
+      sheetPrefixesTA.current.value += '\n';
+    sheetPrefixesTA.current.value += e.target.textContent;
+    setSheetSettingsChanged(true);
     setImportPrefixOpen(false);
+  };
+
+  const saveCurrentSheetSettings = () => {
+    currentSheet.sheetType = sheetType;
+    if (sheetRepRangeTB.current) currentSheet.repRange = sheetRepRangeTB.current.value;
+    if (sheetPrefixesTA.current) currentSheet.prefixes = sheetPrefixesTA.current.value;
+    if (sheetTemplateTA.current) currentSheet.template = sheetTemplateTA.current.value;
+    if (sheetFileURLTB.current) currentSheet.fileURL = sheetFileURLTB.current.value;
+    if (sheetRdfURLTB.current) currentSheet.rdfURL = sheetRdfURLTB.current.value;
+    onChange(settings);
+    setSheetSettingsChanged(false);
+    alert("シートの設定を保存しました。");
   };
 
   return(
     <div className={styles.allSettings}>
-      <div className={styles.title}>
-        <span>Settings</span>
-        <span className={styles.glue}> </span>
-        <button onClick={()=>setAppSettingsOpen(true)}>アプリ設定</button>
+      <div className={styles.title}>ファイル設定</div>
+      <div className={styles.selectedSheetDiv}>
+       <label>設定するシート: 
+         <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
+           {settings.map((setting) => (
+             <option value={setting.index} key={setting.index}>{setting.name}</option>
+           ))}
+         </select>
+         <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
+           {sheetSettingsChanged ? 'シート設定変更あり' : 'シート設定変更なし'}
+         </span>
+         <button className={styles.saveBtn} onClick={saveCurrentSheetSettings}>設定保存</button>
+       </label>
       </div>
-      <MyDialog isVisible={isAppSettingsOpen} onClose={()=>setAppSettingsOpen(false)}>
-        <AppSettings onChanged={()=>setAppSettingsOpen(false)}/>
-      </MyDialog>
-      <label>設定するシート: 
-        <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
-          {settings.map((setting) => (
-            <option value={setting.index} key={setting.index}>{setting.name}</option>
-          ))}
-        </select>
-      </label>
       <div className={styles.typeSelect}>
         <div className={styles.sheetType}>
           <label>
-            <input id="sheetTypeTI"
-                   type="radio"
+            <input type="radio"
                    name="sheetType"
                    value="repetitive-embedding"
                    checked={sheetType==='repetitive-embedding'}
-                   onChange={changeSheetType}/>反復埋め込み
+                   onChange={handleSheetTypeChange}/>反復埋め込み
             <div className={styles.repRangeDiv}>
               反復範囲:
-              <input type="text" value={sheetRepRange} onChange={changeSheetRepRange}/>
+              <input ref={sheetRepRangeTB} type="text" defaultValue={currentSheet.repRange}/>
               <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
             </div>
           </label>
@@ -159,9 +146,13 @@ console.log(`GAHA: `,e.target.textContent);
                    name="sheetType"
                    value="simple-embedding"
                    checked={sheetType==='simple-embedding'}
-                   onChange={changeSheetType}/>単純埋め込み
+                   onChange={handleSheetTypeChange}/>単純埋め込み
           </label>
         </div>
+      </div>
+      <div className={styles.convFuncsDiv}>
+        <h4>変換関数</h4>
+        <p>未実装。</p>
       </div>
       <div className={styles.prefixDiv}>
         <h4>
@@ -169,23 +160,32 @@ console.log(`GAHA: `,e.target.textContent);
           <span className={styles.glue}></span>
           <button id="importPrefixBtn"
                   className={styles.importPrefixBtn}
-                  onClick={()=>setImportPrefixOpen(true)}>プレフィックスを取り込む</button>
-          <MyDialog isVisible={isImportPrefixOpen} onClose={()=>setImportPrefixOpen(false)}>
+                  onClick={()=>setImportPrefixOpen(true)}>
+            プレフィックスを取り込む
+          </button>
+          <MyDialog isVisible={isImportPrefixOpen}
+                    onClose={()=>setImportPrefixOpen(false)}>
             <p>取り込みたいプレフィックスをクリックして下さい。</p>
             { appData.prefixes.split("\n").map((line) => {
               return <p onClick={importPrefix}>{line}</p>;
             })}
           </MyDialog>
         </h4>
-        <textarea value={sheetPrefixes} onChange={changeSheetPrefixes} className={styles.prefixTA}/>
+        <textarea ref={sheetPrefixesTA}
+                  defaultValue={currentSheet.prefixes}
+                  className={styles.prefixTA}/>
       </div>
       <div>
         <h4>テンプレート</h4>
-        <textarea value={sheetTemplate} onChange={changeSheetTemplate} className={styles.templateTA}/>
+        <textarea ref={sheetTemplateTA}
+                  defaultValue={currentSheet.template}
+                  className={styles.templateTA}/>
       </div>
       <div className={styles.pathDiv}>
-        <label htmlFor="fileURLTB">ファイルURL</label><input id="fileURLTB" type="text" value={sheetFileURL} onChange={changeSheetFileURL}/>
-        <label htmlFor="rdfURLTB">RDF URL</label><input id="rdfURLTB" type="text" value={sheetRdfURL} onChange={changeSheetRdfURL}/>
+        <label htmlFor="fileURLTB">ファイルURL</label>
+        <input ref={sheetFileURLTB} type="text" defaultValue={currentSheet.fileURL}/>
+        <label htmlFor="rdfURLTB">RDF URL</label>
+        <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfURL}/>
       </div>
     </div>
   );

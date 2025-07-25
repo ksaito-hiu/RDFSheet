@@ -25,12 +25,16 @@
     font-size: 2rem;
 }
 
-.glue {
-    flex-grow: 1;
+.selectedSheetDiv {
+    font-size: 1.5em;
 }
 
-.title button {
-    font-size: 1rem;
+.selectedSheetDiv select {
+    font-size: 1.0em;
+}
+
+.saveBtn {
+    font-size: 1.0em;
 }
 
 .typeSelect {
@@ -64,6 +68,9 @@
     height: 100%;
 }
 
+.convFuncsDiv {
+}
+
 .prefixDiv {
 }
 
@@ -95,3 +102,4 @@
 .pathDiv label {
     text-align: right;
 }
+

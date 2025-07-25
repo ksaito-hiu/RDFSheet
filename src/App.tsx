@@ -9,6 +9,7 @@ import ToggleDiv from './ToggleDiv';
 import MyDialog from './MyDialog';
 import Luckysheet from './Luckysheet';
 import Settings from './Settings';
+import AppSettings from './AppSettings';
 import LoadComponent from './LoadComponent';
 import SaveComponent from './SaveComponent';
 import ImportComponent from './ImportComponent';
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<Setting[]>([]);
   const [isSheetsActive, setSheetsActive] = useState(true);
   const [isSettingsActive, setSettingsActive] = useState(false);
+  const [isAppSettingsActive, setAppSettingsActive] = useState(false);
   const [isLoadOpen, setLoadOpen] = useState(false);
   const [isSaveOpen, setSaveOpen] = useState(false);
   const [isImportOpen, setImportOpen] = useState(false);
@@ -27,10 +29,16 @@ const App: React.FC = () => {
     if (selected === 'sheets') {
       setSheetsActive(true);
       setSettingsActive(false);
+      setAppSettingsActive(false);
     } else if (selected === 'settings') {
       setSettings(updateSettings());
       setSheetsActive(false);
       setSettingsActive(true);
+      setAppSettingsActive(false);
+    } else if (selected === 'appSettings') {
+      setSheetsActive(false);
+      setSettingsActive(false);
+      setAppSettingsActive(true);
     } else if (selected === 'load') {
       setLoadOpen(true);
     } else if (selected === 'save') {
@@ -60,6 +68,9 @@ const App: React.FC = () => {
         </ToggleDiv>
         { isSettingsActive === true ? (
           <Settings settings={settings} onChange={(ss)=>setSettings(ss)}/>
+        ) : null }
+        { isAppSettingsActive === true ? (
+          <AppSettings/>
         ) : null }
       </main>
       <MyDialog isVisible={isLoadOpen} onClose={()=>setLoadOpen(false)}>

@@ -22,6 +22,7 @@ const Menu: React.FC<Props> = ({ onSelect }) => {
             <ul>
               <li onClick={() => {closeAndNotify('sheets');}}>Sheet</li>
               <li onClick={() => {closeAndNotify('settings');}}>Settings</li>
+              <li onClick={() => {closeAndNotify('appSettings');}}>AppSettings</li>
             </ul></li>
           <li>ファイル
             <ul>

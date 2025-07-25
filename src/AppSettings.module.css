@@ -1,3 +1,12 @@
+/* AppSettings.module.css */
+
+.allAppSettings {
+    width: 95%;
+    height: 95%; /* 100% ??? */
+    margin: 0 auto;
+    padding: 1rem;
+}
+
 .prefixesDiv {
     width: 95%;
     margin: auto;
