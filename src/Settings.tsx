@@ -102,7 +102,7 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
     onChange(settings);
   }
 
-  const importPrefix = () => {
+  const importRepRange = () => {
     const selected = getSelectedRange();
     if (selected.sheetIdx !== sheetIdx) {
       alert(`設定中のシートと、現在アクティブなシートが異なっているので取り込みを中止します。`);
@@ -114,6 +114,11 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
     }
     setSheetRepRange(selected.range);
   };
+  const importPrefix = (e: any) => {
+console.log(`GAHA: `,e.target.textContent);
+    setSheetPrefixes(sheetPrefixes+e.target.textContent);
+    setImportPrefixOpen(false);
+  };
 
   return(
     <div className={styles.allSettings}>
@@ -124,7 +129,6 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
       </div>
       <MyDialog isVisible={isAppSettingsOpen} onClose={()=>setAppSettingsOpen(false)}>
         <AppSettings onChanged={()=>setAppSettingsOpen(false)}/>
-        <p>dummy</p>
       </MyDialog>
       <label>設定するシート: 
         <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
@@ -145,7 +149,7 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
             <div className={styles.repRangeDiv}>
               反復範囲:
               <input type="text" value={sheetRepRange} onChange={changeSheetRepRange}/>
-              <button type="button" onClick={importPrefix}>選択範囲から取り込み</button>
+              <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
             </div>
           </label>
         </div>
@@ -168,10 +172,9 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
                   onClick={()=>setImportPrefixOpen(true)}>プレフィックスを取り込む</button>
           <MyDialog isVisible={isImportPrefixOpen} onClose={()=>setImportPrefixOpen(false)}>
             <p>取り込みたいプレフィックスをクリックして下さい。</p>
-            {Object.keys(appData.prefixes).map((key) => {
-              return <p>{key}: {appData.prefixes[key]}</p>;
+            { appData.prefixes.split("\n").map((line) => {
+              return <p onClick={importPrefix}>{line}</p>;
             })}
-            <pre>{JSON.stringify(appData,null,2)}</pre>
           </MyDialog>
         </h4>
         <textarea value={sheetPrefixes} onChange={changeSheetPrefixes} className={styles.prefixTA}/>

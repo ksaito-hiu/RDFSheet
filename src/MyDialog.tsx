@@ -32,7 +32,7 @@ const MyDialog: React.FC<Props> = ({ isVisible, onClose, children }) => {
 
   return (isVisible ?
     (
-      <dialog ref={dialogRef} style={{zIndex:3000}}>
+      <dialog ref={dialogRef} style={{zIndex:3000,width:'80%'}}>
         <div style={{border:'black'}}>
           {children}
         </div>

@@ -1,0 +1,19 @@
+.prefixesDiv {
+    width: 95%;
+    margin: auto;
+}
+
+.prefixesTA {
+    width: 100%;
+    height: 10em;
+}
+
+.idpDiv {
+    width: 95%;
+    margin: auto;
+    display: flex;
+}
+
+.idpTB {
+    width: 100%;
+}

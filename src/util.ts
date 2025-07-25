@@ -52,11 +52,11 @@ export const makeDummySetting: ()=>Setting = () => {
     name: '??????????',
     status: 0,
     sheetType: 'repetitive-embedding',
-    repRange: 'gaha1',
-    prefixes: 'gaha2',
-    template: 'gaha3:'+Math.random(),
-    fileURL: 'gaha4',
-    rdfURL: 'gaha5'
+    repRange: '',
+    prefixes: '',
+    template: '',
+    fileURL: 'https://example.org/my_pod/rdfsheet.rdfs',
+    rdfURL: 'https://example.org/my_pod/rdfsheet.ttl'
   };
 }
 

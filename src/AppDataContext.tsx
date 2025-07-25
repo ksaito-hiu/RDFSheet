@@ -10,9 +10,8 @@ const RDFSheetLocalStorageKey = 'RDFSheetLocalStorageKey';
 const localStorage = (window as any).localStorage;
 
 export type AppData = {
-  //book: any;
-  prefixes: any;
-  idp: string;
+  prefixes: string; // 1行に1プレフィックス宣言
+  idp: string; // ログインのためのデフォルトのidp
 };
 
 type AppDataContextType = {
@@ -23,7 +22,7 @@ type AppDataContextType = {
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
 
 export const AppDataProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [appData, setAppData ] = useState<AppData>({prefixes:{},idp:'none'});
+  const [appData, setAppData ] = useState<AppData>({prefixes:'@prefix dc: <http://purl.org/dc/terms/> .',idp:'https://solidcommunity.net'});
 
   useEffect(()=>{
     const saved = localStorage.getItem(RDFSheetLocalStorageKey);
@@ -35,7 +34,7 @@ export const AppDataProvider: React.FC<{children: React.ReactNode}> = ({ childre
         }
       } catch(e) {
         console.warn("設定の読み込みに失敗しました。",e);
-        setAppData({prefixes:{dc:'http://purl.org/dc/terms/'},idp:'https://solidcommunity.net'});
+        setAppData({prefixes:'@prefix dc: <http://purl.org/dc/terms/> .',idp:'https://solidcommunity.net'});
         console.warn("設定を初期化しました。");
       }
     }
