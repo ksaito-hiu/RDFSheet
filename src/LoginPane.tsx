@@ -5,7 +5,8 @@ import { useAppData } from "./AppDataContext";
 
 const LoginPane: React.FC = () => {
   const { appData, updateAppData } = useAppData();
-  const [ webId, setWebId ] = useState(id);
+  const [ isLoggedIn, setLoggedIn ] = useState(id===null?false:true);
+  const [ webId, setWebId ] = useState(id===null?'not logged in':id);
   const [ idp, setIdp ] = useState(appData?(appData.idp?appData.idp:'https://solidcommunity.net'):'https://solidcommunity.net');
   const [ dialogOpen, setDialogOpen ] = useState(false);
 
@@ -17,24 +18,38 @@ const LoginPane: React.FC = () => {
     updateAppData({idp}); // ログイン前だけどこのタイミングしか・・・
     await myLogin(idp);
     // 以下リダイレクションするので意味ない？
-    setWebId(id);
+    setWebId(id===null?'not logged in':id);
     setDialogOpen(false);
   };
 
   const processLogout: ()=>void = () => {
     myLogout();
+    setLoggedIn(false);
     setWebId('not logged in');
     setDialogOpen(false); // MyDialog消すため
   };
 
   return (
     <>
-      <p>WebID: {webId} <button onClick={()=>{setDialogOpen(true);}}>login or logout</button></p>
+      <p>
+        <button onClick={()=>{setDialogOpen(true);}}>
+          { isLoggedIn ? 'logout or relogin' : 'login' }
+        </button>
+        <span style={{marginLeft:'1em'}}>WebID: {webId}</span>
+      </p>
       <MyDialog isVisible={dialogOpen} onClose={()=>setDialogOpen(false)}>
-        <p>ダイアログ</p>
-        <input type="text" value={idp} onChange={handleIdpChange} />
-        <button onClick={processLogin}>Login</button>
-        <button onClick={processLogout}>Logout</button>
+        <h4>ダイアログ</h4>
+        <div style={{display:'flex'}}>
+          idp: <input type="text" value={idp} onChange={handleIdpChange} style={{flexGrow:1}}/>
+          <button onClick={processLogin}>Login</button>
+        </div>
+        <ul>
+          <li><button onClick={()=>{setIdp('https://solidcommunity.net');}}>Solid Community</button></li>
+          <li><button onClick={()=>{setIdp('https://solidweb.me');}}>solidweb.me</button></li>
+          <li><button onClick={()=>{setIdp('https://solidweb.org');}}>solidweb.org</button></li>
+          <li><button onClick={()=>{setIdp('https://login.inrupt.com');}}>Inrupt podspace</button></li>
+        </ul>
+        <p><button onClick={processLogout}>Logout</button></p>
       </MyDialog>
     </>
   )

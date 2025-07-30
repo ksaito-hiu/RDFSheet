@@ -14,7 +14,7 @@ export const myLogout = () => {
 };
 
 export let isLoggedIn: boolean = false;
-export let webId: string = 'not logged in';
+export let webId: string | null = null;
 
 export async function updateLoginStatus() {
   const info = await handleIncomingRedirect();
@@ -23,7 +23,7 @@ export async function updateLoginStatus() {
     if (info.webId) webId = info.webId;
   } else {
     isLoggedIn = false;
-    webId = 'not logged in';
+    webId = null;
   }
 }
 

@@ -1,12 +1,24 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { loadSheetsFromLocal, loadSheetsFromPod } from './util';
+import type { Setting } from './util';
 
 type Props = {
+  settings: Setting[];
   onLoaded: () => void;
 };
 
-const LoadComponent: React.FC<Props> = ({ onLoaded }) => {
+const LoadComponent: React.FC<Props> = ({ settings, onLoaded }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fileURL: string | null = settings.reduce(
+      (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.fileURL:acc),
+      null
+    );
+    if (fileURL && inputRef.current) {
+      inputRef.current.value = fileURL;
+    }
+  },[settings]);
 
   const processLoadFromLocal = async () => {
     await loadSheetsFromLocal();
@@ -22,10 +34,12 @@ const LoadComponent: React.FC<Props> = ({ onLoaded }) => {
 
   return (
     <>
-      <p>LoadComponent</p>
-      <button type="button" onClick={processLoadFromLocal}>load from local</button>
-      <input type="text"/>
-      <button type="button" onClick={processLoadFromPod}>load from pod</button>
+      <h4>LoadComponent</h4>
+      <div><button type="button" onClick={processLoadFromLocal}>load from local</button></div>
+      <div style={{display:'flex',margin:'1em 0'}}>
+        <button type="button" onClick={processLoadFromPod}>load from pod</button>
+        <input type="text" ref={inputRef} style={{flexGrow:1}}/>
+      </div>
     </>
   );
 }

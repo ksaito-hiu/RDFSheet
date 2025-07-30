@@ -74,16 +74,20 @@ const App: React.FC = () => {
         ) : null }
       </main>
       <MyDialog isVisible={isLoadOpen} onClose={()=>setLoadOpen(false)}>
-        <LoadComponent onLoaded={()=>{setLoadOpen(false);setSettings(settingsContainer.settings);}}/>
+        <LoadComponent settings={settings}
+                       onLoaded={()=>{setLoadOpen(false);setSettings(settingsContainer.settings);}}/>
       </MyDialog>
       <MyDialog isVisible={isSaveOpen} onClose={()=>setSaveOpen(false)}>
-        <SaveComponent onSaved={()=>setSaveOpen(false)}/>
+        <SaveComponent settings={settings}
+                       onSaved={()=>setSaveOpen(false)}/>
       </MyDialog>
       <MyDialog isVisible={isImportOpen} onClose={()=>setImportOpen(false)}>
-        <ImportComponent onImported={()=>setImportOpen(false)}/>
+        <ImportComponent settings={settings}
+                         onImported={()=>setImportOpen(false)}/>
       </MyDialog>
       <MyDialog isVisible={isExportOpen} onClose={()=>setExportOpen(false)}>
-        <ExportComponent onExported={()=>setExportOpen(false)}/>
+        <ExportComponent settings={settings}
+                         onExported={()=>setExportOpen(false)}/>
       </MyDialog>
     </AppDataProvider>
   )

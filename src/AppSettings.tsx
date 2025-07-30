@@ -22,11 +22,11 @@ const AppSettings: React.FC = () => {
       <p>編集中のファイルではなくアプリの設定をします。</p>
       <h4>プレフィックス</h4>
       <div className={styles.prefixesDiv}>
-        <textarea ref={prefixesTA} className={styles.prefixesTA}>{appData.prefixes}</textarea>
+        <textarea ref={prefixesTA} className={styles.prefixesTA} defaultValue={appData.prefixes}></textarea>
       </div>
       <h4>デフォルトのログイン場所</h4>
       <div className={styles.idpDiv}>
-        <input ref={idpTB} className={styles.idpTB} value={appData.idp}/>
+        <input ref={idpTB} className={styles.idpTB} defaultValue={appData.idp}/>
       </div>
       <button onClick={changeAppSettings}>変更</button>
     </div>
