@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { saveSheetsToLocal, saveSheetsToPod } from './util';
-import type { Setting } from './util';
+import type { Settings } from './util';
 
 type Props = {
-  settings: Setting[];
+  settings: Settings;
   onSaved: () => void;
 };
 
@@ -11,10 +11,7 @@ const SaveComponent: React.FC<Props> = ({ settings, onSaved }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fileURL: string | null = settings.reduce(
-      (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.fileURL:acc),
-      null
-    );
+    const fileURL: string = settings.fileSettings.podUrl;
     if (fileURL && inputRef.current) {
       inputRef.current.value = fileURL;
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { myLogin, myLogout, webId as id } from './util';
 import MyDialog from './MyDialog';
 import { useAppData } from "./AppDataContext";
@@ -7,8 +7,13 @@ const LoginPane: React.FC = () => {
   const { appData, updateAppData } = useAppData();
   const [ isLoggedIn, setLoggedIn ] = useState(id===null?false:true);
   const [ webId, setWebId ] = useState(id===null?'not logged in':id);
-  const [ idp, setIdp ] = useState(appData?(appData.idp?appData.idp:'https://solidcommunity.net'):'https://solidcommunity.net');
+  const [ idp, setIdp ] = useState('https://solidcommunity.net');
   const [ dialogOpen, setDialogOpen ] = useState(false);
+
+  useEffect(()=>{
+    const adIdp = appData?(appData.idp?appData.idp:'https://solidcommunity.net'):'https://solidcommunity.net';
+    setIdp(adIdp);
+  },[appData]);
 
   const handleIdpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIdp(e.target.value);
@@ -38,7 +43,8 @@ const LoginPane: React.FC = () => {
         <span style={{marginLeft:'1em'}}>WebID: {webId}</span>
       </p>
       <MyDialog isVisible={dialogOpen} onClose={()=>setDialogOpen(false)}>
-        <h4>ダイアログ</h4>
+        <h4>ログイン・ログアウト</h4>
+        <p>ログインしたい時はidpに認証サーバを直接入力するか、代表的な認証サーバのボタンを押し「Login」ボタンを押して下さい。ログアウトしたい時は「Logout」ボタンを押して下さい。</p>
         <div style={{display:'flex'}}>
           idp: <input type="text" value={idp} onChange={handleIdpChange} style={{flexGrow:1}}/>
           <button onClick={processLogin}>Login</button>
@@ -47,7 +53,7 @@ const LoginPane: React.FC = () => {
           <li><button onClick={()=>{setIdp('https://solidcommunity.net');}}>Solid Community</button></li>
           <li><button onClick={()=>{setIdp('https://solidweb.me');}}>solidweb.me</button></li>
           <li><button onClick={()=>{setIdp('https://solidweb.org');}}>solidweb.org</button></li>
-          <li><button onClick={()=>{setIdp('https://login.inrupt.com');}}>Inrupt podspace</button></li>
+          <li><button onClick={()=>{setIdp('https://login.inrupt.com');}}>Inrupt Identity Provider</button></li>
         </ul>
         <p><button onClick={processLogout}>Logout</button></p>
       </MyDialog>

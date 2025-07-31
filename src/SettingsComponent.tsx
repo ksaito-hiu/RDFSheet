@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './Settings.module.css';
+import styles from './SettingsComponent.module.css';
 import MyDialog from './MyDialog';
 import { getSelectedRange } from './util';
-import type { SheetType, Setting } from './util';
+import type { SheetType, Setting, Settings } from './util';
 import { useAppData } from './AppDataContext';
 
 /*
@@ -19,25 +19,25 @@ import { useAppData } from './AppDataContext';
  */
 
 type Props = {
-  settings: Setting[];
-  onChange: (ss: Setting[]) => void;
+  settings: Settings;
+  onChange: (ss: Settings) => void;
 };
 
-const Settings: React.FC<Props> = ({ settings, onChange }) => {
+const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
   const [ isImportPrefixOpen, setImportPrefixOpen ] = useState(false);
-  const [ currentSheet, setCurrentSheet ] = useState<Setting>(settings[0]);
+  const [ currentSheet, setCurrentSheet ] = useState<Setting>(settings.sheets[0]);
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
   const [ sheetType, setSheetType ] = useState<SheetType>('repetitive-embedding');
   const [ sheetSettingsChanged, setSheetSettingsChanged ] = useState(false);
+  const sheetPodURLTB = useRef<HTMLInputElement>(null);
   const sheetRepRangeTB = useRef<HTMLInputElement>(null);
   const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
   const sheetTemplateTA = useRef<HTMLTextAreaElement>(null);
-  const sheetFileURLTB = useRef<HTMLInputElement>(null);
   const sheetRdfURLTB = useRef<HTMLInputElement>(null);
   const { appData } = useAppData();
 
   useEffect(() => {
-    const selected: string | null = settings.reduce(
+    const selected: string | null = settings.sheets.reduce(
       (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.index:acc),
       null
     );
@@ -50,7 +50,7 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
         return;
 
     setSheetSettingsChanged(false);
-    const selected: Setting | null = settings.reduce(
+    const selected: Setting | null = settings.sheets.reduce(
       (acc: Setting | null, cur: Setting) => acc!==null?acc:((cur.index===idx)?cur:acc),
       null
     );
@@ -61,8 +61,7 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
       if (sheetRepRangeTB.current) sheetRepRangeTB.current.value = selected.repRange;
       if (sheetPrefixesTA.current) sheetPrefixesTA.current.value = selected.prefixes;
       if (sheetTemplateTA.current) sheetTemplateTA.current.value = selected.template;
-      if (sheetFileURLTB.current) sheetFileURLTB.current.value = selected.fileURL;
-      if (sheetRdfURLTB.current) sheetRdfURLTB.current.value = selected.rdfURL;
+      if (sheetRdfURLTB.current) sheetRdfURLTB.current.value = selected.rdfPodUrl;
     } else {
       console.log(`GAHA: There is no sheet: index=${idx}???`);
     }
@@ -98,12 +97,12 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
   };
 
   const saveCurrentSheetSettings = () => {
+    if (sheetPodURLTB.current) settings.fileSettings.podUrl = sheetPodURLTB.current.value;
     currentSheet.sheetType = sheetType;
     if (sheetRepRangeTB.current) currentSheet.repRange = sheetRepRangeTB.current.value;
     if (sheetPrefixesTA.current) currentSheet.prefixes = sheetPrefixesTA.current.value;
     if (sheetTemplateTA.current) currentSheet.template = sheetTemplateTA.current.value;
-    if (sheetFileURLTB.current) currentSheet.fileURL = sheetFileURLTB.current.value;
-    if (sheetRdfURLTB.current) currentSheet.rdfURL = sheetRdfURLTB.current.value;
+    if (sheetRdfURLTB.current) settings.fileSettings.podUrl = sheetRdfURLTB.current.value;
     onChange(settings);
     setSheetSettingsChanged(false);
     alert("シートの設定を保存しました。");
@@ -111,11 +110,17 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
 
   return(
     <div className={styles.allSettings}>
-      <div className={styles.title}>ファイル設定</div>
+      <div className={styles.title}>
+        <h3>ファイル設定</h3>
+        <div className={styles.filePathDiv}>
+          <label htmlFor="fileURLTB">ファイルURL</label>
+          <input ref={sheetPodURLTB} type="text" defaultValue={settings.fileSettings.podUrl}/>
+        </div>
+      </div>
       <div className={styles.selectedSheetDiv}>
        <label>設定するシート: 
          <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
-           {settings.map((setting) => (
+           {settings.sheets.map((setting) => (
              <option value={setting.index} key={setting.index}>{setting.name}</option>
            ))}
          </select>
@@ -182,13 +187,11 @@ const Settings: React.FC<Props> = ({ settings, onChange }) => {
                   className={styles.templateTA}/>
       </div>
       <div className={styles.pathDiv}>
-        <label htmlFor="fileURLTB">ファイルURL</label>
-        <input ref={sheetFileURLTB} type="text" defaultValue={currentSheet.fileURL}/>
         <label htmlFor="rdfURLTB">RDF URL</label>
-        <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfURL}/>
+        <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfPodUrl}/>
       </div>
     </div>
   );
 };
 
-export default Settings;
+export default SettingsComponent;

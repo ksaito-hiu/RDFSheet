@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { openHelp, openAbout, updateSettings, settingsContainer } from './util';
-import type { Setting } from './util';
+import type { Settings } from './util';
 import './App.css';
 import { AppDataProvider } from './AppDataContext';
 import LoginPane from './LoginPane';
@@ -8,7 +8,7 @@ import Menu from './Menu';
 import ToggleDiv from './ToggleDiv';
 import MyDialog from './MyDialog';
 import Luckysheet from './Luckysheet';
-import Settings from './Settings';
+import SettingsComponent from './SettingsComponent';
 import AppSettings from './AppSettings';
 import LoadComponent from './LoadComponent';
 import SaveComponent from './SaveComponent';
@@ -16,7 +16,7 @@ import ImportComponent from './ImportComponent';
 import ExportComponent from './ExportComponent';
 
 const App: React.FC = () => {
-  const [settings, setSettings] = useState<Setting[]>([]);
+  const [settings, setSettings] = useState<Settings>(settingsContainer.settings);
   const [isSheetsActive, setSheetsActive] = useState(true);
   const [isSettingsActive, setSettingsActive] = useState(false);
   const [isAppSettingsActive, setAppSettingsActive] = useState(false);
@@ -67,7 +67,7 @@ const App: React.FC = () => {
           <Luckysheet onLoad={(ss)=>setSettings(ss)}/>
         </ToggleDiv>
         { isSettingsActive === true ? (
-          <Settings settings={settings} onChange={(ss)=>setSettings(ss)}/>
+          <SettingsComponent settings={settings} onChange={(ss)=>setSettings(ss)}/>
         ) : null }
         { isAppSettingsActive === true ? (
           <AppSettings/>

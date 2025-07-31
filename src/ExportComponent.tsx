@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { exportRDFToLocal, exportRDFToPod } from './util';
-import type { Setting } from './util';
+import type { Setting, Settings } from './util';
 
 type Props = {
-  settings: Setting[];
+  settings: Settings;
   onExported: () => void;
 };
 
@@ -11,8 +11,8 @@ const ExportComponent: React.FC<Props> = ({ settings, onExported }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const rdfURL: string | null = settings.reduce(
-      (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.rdfURL:acc),
+    const rdfURL: string | null = settings.sheets.reduce(
+      (acc: string | null, cur: Setting) => acc!==null?acc:((cur.status===1)?cur.rdfPodUrl:acc),
       null
     );
     if (rdfURL && inputRef.current) {

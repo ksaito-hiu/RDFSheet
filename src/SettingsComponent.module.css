@@ -19,14 +19,23 @@
     padding: 0.2em;
 }
 
-.title {
+.title h3 {
+    font-size: 2em;
+    margin: 0;
+}
+
+.filePathDiv {
+    margin: 0.3em;
     display: flex;
-    flex-direction: row;
-    font-size: 2rem;
+}
+
+.filePathDiv input {
+    flex-grow: 1;
 }
 
 .selectedSheetDiv {
     font-size: 1.5em;
+    margin: 0.3em;
 }
 
 .selectedSheetDiv select {
@@ -93,13 +102,11 @@
 }
 
 .pathDiv {
-    display: grid;
-    grid-template-columns: 10em 1fr;
-    gap: 0.5rem;
-    margin: 1rem;
+    display: flex;
+    padding: 0.5em;
 }
 
-.pathDiv label {
-    text-align: right;
+.pathDiv input {
+    flex-grow: 1;
 }
 

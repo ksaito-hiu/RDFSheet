@@ -19,33 +19,38 @@ type AppDataContextType = {
   updateAppData: (newAppData: Partial<AppData>) => void;
 };
 
+const defaultAppData: AppData = {
+  prefixes: '@prefix dc: <http://purl.org/dc/terms/> .',
+  idp: 'https://solidcommunity.net'
+};
+
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
 
 export const AppDataProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [appData, setAppData ] = useState<AppData>({prefixes:'@prefix dc: <http://purl.org/dc/terms/> .',idp:'https://solidcommunity.net'});
-
-  useEffect(()=>{
+  const [appData, setAppData ] = useState<AppData>(() => {
+    // この書き方でなくuseEffect(()=>{},[])を使うと上手くいかない
+    // たぶん<StrictMode>だから・・・？
     const saved = localStorage.getItem(RDFSheetLocalStorageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          setAppData((prev) => ({ ...prev, ...parsed }));
+          return { ...defaultAppData, ...parsed };
         }
       } catch(e) {
         console.warn("設定の読み込みに失敗しました。",e);
-        setAppData({prefixes:'@prefix dc: <http://purl.org/dc/terms/> .',idp:'https://solidcommunity.net'});
-        console.warn("設定を初期化しました。");
+        console.warn("設定を初期化します。");
+        return defaultAppData;
       }
     }
-  },[])
+  });
 
   useEffect(() => {
     localStorage.setItem(RDFSheetLocalStorageKey, JSON.stringify(appData));
   }, [appData]);
 
   const updateAppData = (newAppData: Partial<AppData>) => {
-    setAppData((prev) => ({ ...prev, ...newAppData }));
+    setAppData(prev => ({ ...prev, ...newAppData }));
   };
 
   return (

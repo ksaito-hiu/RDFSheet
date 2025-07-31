@@ -1,7 +1,7 @@
 //import { handleIncomingRedirect, login, logout, authFetch } from '@inrupt/solid-client-authn-browser';
 const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidClientAuthentication;
 
-//export const authFetch = fetch;
+export const authFetch = fetch;
 
 export const myLogin = async (idp: string) => {
   await login({
@@ -43,11 +43,24 @@ export type Setting = {
   convFuncs: {in:string,out:string}[][];
   prefixes: string;
   template: string;
-  fileURL: string;
-  rdfURL: string;
+  rdfPodUrl: string;
 };
 
-export const makeDummySetting: ()=>Setting = () => {
+export type Settings ={
+  sheets: Setting[];
+  fileSettings: { podUrl: string; };
+}
+
+export const settingsContainer: { settings: Settings } = {
+  settings: {
+    sheets: [],
+    fileSettings: {
+      podUrl: ''
+    }
+  }
+};
+
+export const makeDummySheetData: ()=>Setting = () => {
   return {
     index: 'iTha4zah', // 適当
     name: '??????????',
@@ -57,49 +70,57 @@ export const makeDummySetting: ()=>Setting = () => {
     convFuncs: [],
     prefixes: '',
     template: '',
-    fileURL: 'https://example.org/my_pod/rdfsheet.rdfs',
-    rdfURL: 'https://example.org/my_pod/rdfsheet.ttl'
+    rdfPodUrl: 'https://example.org/my_pod/rdfsheet.ttl'
   };
 }
 
-export const settingsContainer: { settings: Setting[] } = {
-  settings: []
-};
+export const makeDummySettingsData: ()=>Settings = () => {
+  return {
+    sheets: [],
+    fileSettings: { podUrl: 'https://example.org/my_pod/rdfsheet.rdfs' }
+  };
+}
 
 // luckysheetを調べて設定データを更新する。
 // luckysheetにシートの更新を検知する機能が無いので、
 // Settingsコンポーネントが表示されるタイミングで、
 // これが実行される。あと、ファイルなどから読み込んだ
 // 時にも実行することにした。
-export const updateSettings: ()=>Setting[] = () => {
-  const sheets = (luckysheet.getAllSheets() as Setting[]);
-  const oldSettings: Setting[] = settingsContainer.settings;
-  const newSettings: Setting[] = [];
-  sheets.forEach((sheet) => {
-    const oldSetting: Setting | null = oldSettings.reduce(
-      (acc: Setting | null,cur) => acc?acc:(cur.index===(sheet.index).toString()?cur:acc),
+export const updateSettings: ()=>Settings = () => {
+  const nowSheets = (luckysheet.getAllSheets() as Setting[]);
+  const oldSheets: Setting[] = settingsContainer.settings.sheets;
+  const newSheets: Setting[] = [];
+  nowSheets.forEach((nowSheet) => {
+    const oldSheet: Setting | null = oldSheets.reduce(
+      (acc: Setting | null,cur) => acc?acc:(cur.index===(nowSheet.index).toString()?cur:acc),
       null
     );
-    if (oldSetting !== null) {
-      oldSetting.name = sheet.name;
-      oldSetting.status = Number(sheet.status);
-      newSettings.push(oldSetting);
+    if (oldSheet !== null) {
+      oldSheet.name = nowSheet.name;
+      oldSheet.status = Number(nowSheet.status);
+      newSheets.push(oldSheet);
     } else {
-      const s = makeDummySetting();
-      s.index = (sheet.index).toString();
-      s.name = sheet.name;
-      s.status = Number(sheet.status);
-      newSettings.push(s);
+      const s = makeDummySheetData();
+      s.index = (nowSheet.index).toString();
+      s.name = nowSheet.name;
+      s.status = Number(nowSheet.status);
+      newSheets.push(s);
     }
   });
-  settingsContainer.settings = newSettings;
-  return newSettings;
+  settingsContainer.settings.sheets = newSheets;
+  return settingsContainer.settings;
 };
 
 type RDFS = {
   luckysheetfile: any;
   settings: any;
 };
+
+// 型のわからない例外から文字列のエラーメッセージを生成
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  return String(e);
+}
 
 // JSONデータからRDFSheetファイルを開く
 export function loadSheetsFromJSON(json: RDFS) {
@@ -139,7 +160,7 @@ export async function loadSheetsFromLocal(): Promise<void> {
     const rdfs = (JSON.parse(text) as RDFS);
     loadSheetsFromJSON(rdfs);
   } catch(e) {
-    alert('ファイルは開かれませんでした。');
+    alert(`ファイルは開かれませんでした。${getErrorMessage(e)}`);
   }
 }
 
@@ -150,7 +171,7 @@ export async function loadSheetsFromPod(podUrl: string): Promise<void> {
     const json = await res.json();
     loadSheetsFromJSON(json);
   } catch(e) {
-    alert(`ファイルの読み込みに失敗しました。`);
+    alert(`ファイルの読み込みに失敗しました。${getErrorMessage(e)}`);
   }
 }
 
@@ -173,7 +194,7 @@ export async function saveSheetsToLocal(): Promise<void> {
     await writable.write(JSON.stringify(rdfs));
     await writable.close();
   } catch(e) {
-    alert('ファイルは保存されませんでした。');
+    alert(`ファイルは保存されませんでした。${getErrorMessage(e)}`);
   }
 }
 
@@ -187,12 +208,13 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
     await fetch(podUrl, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/x-rdfsheet+json',
-        body: JSON.stringify(rdfs)
-      }
+        'Content-Type': 'application/x-rdfsheet+json'
+      },
+      body: JSON.stringify(rdfs)
     });
+    alert('ファイルを保存しました。');
   } catch(e) {
-    alert(`ファイルの保存に失敗しました。`);
+    alert(`ファイルの保存に失敗しました。${getErrorMessage(e)}`);
   }
 }
 

@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { loadSheetsFromJSON, updateSettings } from './util';
-import type { Setting } from './util';
+import { loadSheetsFromJSON, updateSettings, makeDummySettingsData } from './util';
+import type { Settings } from './util';
 
 type Props = {
-  onLoad: (ss: Setting[]) => void;
+  onLoad: (ss: Settings) => void;
 };
 
 type RDFS = {
   luckysheetfile: any;
-  settings: Setting[];
+  settings: Settings;
 };
 
 const Luckysheet: React.FC<Props> = ({ onLoad }) => {
@@ -27,10 +27,10 @@ const Luckysheet: React.FC<Props> = ({ onLoad }) => {
         rdfs = JSON.parse(str);
         localStorage.removeItem('RDFSheetTempFile');
       } else {
-        rdfs = {luckysheetfile:undefined,settings:[]};
+        rdfs = {luckysheetfile:undefined,settings:makeDummySettingsData()};
       }
     } catch(e) {
-      rdfs = {luckysheetfile:undefined,settings:[]};
+      rdfs = {luckysheetfile:undefined,settings:makeDummySettingsData()};
     }
     loadSheetsFromJSON(rdfs);
     updateSettings();
