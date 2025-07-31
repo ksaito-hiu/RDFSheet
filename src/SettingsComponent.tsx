@@ -105,7 +105,7 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     if (sheetRdfURLTB.current) settings.fileSettings.podUrl = sheetRdfURLTB.current.value;
     onChange(settings);
     setSheetSettingsChanged(false);
-    alert("シートの設定を保存しました。");
+    alert("シートの設定を変更しました。");
   };
 
   return(
@@ -125,9 +125,9 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
            ))}
          </select>
          <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
-           {sheetSettingsChanged ? 'シート設定変更あり' : 'シート設定変更なし'}
+           {sheetSettingsChanged ? 'シート設定修正あり' : 'シート設定修正なし'}
          </span>
-         <button className={styles.saveBtn} onClick={saveCurrentSheetSettings}>設定保存</button>
+         <button className={styles.saveBtn} onClick={saveCurrentSheetSettings}>設定変更</button>
        </label>
       </div>
       <div className={styles.typeSelect}>

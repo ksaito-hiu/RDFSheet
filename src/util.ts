@@ -220,22 +220,71 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
 
 // ローカルのファイルからRDFファイルの読み込み
 export async function importRDFFromLocal(): Promise<void> {
-  alert('importRDFFromLocal!');
+  updateSettings();
+  alert('importRDFFromLocal. not implemented yet!');
 }
 
 // ローカルのファイルからRDFファイルの読み込み
 export async function importRDFFromPod(podUrl: string): Promise<void> {
-  alert(`importRDFFromPod! url=${podUrl}`);
+  updateSettings();
+  alert(`importRDFFromPod. url=${podUrl}, not implemented yet!`);
+}
+
+function exportRDFToStr() {
+  const sheetSoeji: number = settingsContainer.settings.sheets.reduce(
+    (acc: number, cur: Setting, soeji) => acc!=-1?acc:((cur.status===1)?soeji:acc),
+    -1
+  );
+  const sheet = settingsContainer.settings.sheets[sheetSoeji];
+  if (sheet) {
+    console.log(`name: ${sheet.name}`);
+    console.log(`sheetType: ${sheet.sheetType}`);
+    console.log(`repRange: ${sheet.repRange}`);
+    console.log(`convFuncs: ${JSON.stringify(sheet.convFuncs)}`);
+    console.log(`prefixes: ${sheet.prefixes}`);
+    console.log(`template: ${sheet.template}`);
+    console.log(`rdfPodUrl: ${sheet.rdfPodUrl}`);
+    if (sheet.sheetType==='repetitive-embedding') { // 反復埋め込み
+      const startCell = sheet.repRange.split(':')[0];
+      const endCell = sheet.repRange.split(':')[1];
+      const start = cellStrToColRow(startCell);
+      const end = cellStrToColRow(endCell);
+      console.log(`start=${JSON.stringify(start)}`);
+      console.log(`end=${JSON.stringify(end)}`);
+      const setting = {
+        type: 'v', // 'v'と'm'が可能
+        order: sheetSoeji, // worksheetのorder？？？
+      };
+      for (let row=start.row; row<=end.row; row++) {
+        for (let col=start.col; col<=end.col; col++) {
+          const v = luckysheet.getCellValue(row,col,setting);
+          console.log(`row=${row}, col=${col}, v=${v}`);
+        }
+      }
+      return 'ok';
+    } else { // 単純埋め込み
+      return 'ok';
+    }
+  } else {
+    alert('アクティブなシートがありません？！');
+    return null;
+  }
 }
 
 // ローカルのファイルにRDFを書き出し
 export async function exportRDFToLocal(): Promise<void> {
-  alert('importRDF!');
+  updateSettings();
+  alert('exportRDFToLocal!');
+  const str = exportRDFToStr();
+  console.log(str);
 }
 
 // PodにRDFファイルをアップロード
 export async function exportRDFToPod(podUrl: string): Promise<void> {
+  updateSettings();
   alert(`exportRDFToPod! url=${podUrl}`);
+  const str = exportRDFToStr();
+  console.log(str);
 }
 
 // ヘルプをオープン
@@ -252,9 +301,9 @@ export function openAbout(): void {
   window.open(url,'about',opt);
 }
 
-// 
+// カラム数をアルファベット文字列に変換
 export const columnNumToAlphabet = (idx: number) => {
-  let ret = '';
+  let ret: string = '';
   let tmp = idx;
   do {
     const remainder = tmp % 25;
@@ -262,6 +311,29 @@ export const columnNumToAlphabet = (idx: number) => {
     ret = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(remainder) + ret;
   } while (tmp > 0);
   return ret;
+};
+
+// アルファベット文字列をカラム数に変換
+export const alphabetToColumnNum = (str: string) => {
+  const strL = str.toUpperCase();
+  let num: number = 0;
+  for (let i=(strL.length-1);i>=0;i--) {
+    num *= 25;
+    num += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(strL.charAt(i));
+  }
+  return num;
+};
+
+// セルを表す文字列から列と行を計算する
+export const cellStrToColRow: (cell: string)=>{col: number; row: number} = (cell: string) => {
+  const match = cell.match(/^([A-Z]+)(\d+)$/i);
+  if (!match)
+    throw new Error("無効なセル式です。");
+
+  const [, col, row] = match;
+  const colNum = alphabetToColumnNum(col);
+  const rowNum = Number(row)-1;
+  return { col: colNum, row: rowNum };
 };
 
 // アクティブなシートの選択されている範囲を返す。
@@ -283,4 +355,11 @@ export const getSelectedRange = () => {
     range: rs[0],
     sheetIdx: idx
   };
-}
+};
+
+export const evalFuncs: (f: {in:string; out:string;}[][], fNum: number, input: string) => string | null = (f,fNum,input) => {
+  return f[fNum].reduce(
+    (acc: string | null, cur) => acc?acc:(cur.in===input)?cur.out:acc,
+    null
+  );
+};
