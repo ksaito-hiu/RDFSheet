@@ -38,11 +38,10 @@ export type Setting = {
   index: string; // LuckySheetがnumber返してきたら文字列にする。本当はあぶない？
   name: string;
   status: number; // 実際には0か1。LuckySheetが"0"か"1"返した時には変換する
-  sheetType: SheetType;
   repRange: string;
-  convFuncs: {in:string,out:string}[][];
   prefixes: string;
-  template: string;
+  oneTimeTemplate: string;
+  iterationTemplate: string;
   rdfPodUrl: string;
 };
 
@@ -65,11 +64,10 @@ export const makeDummySheetData: ()=>Setting = () => {
     index: 'iTha4zah', // 適当
     name: '??????????',
     status: 0,
-    sheetType: 'repetitive-embedding',
     repRange: '',
-    convFuncs: [],
     prefixes: '',
-    template: '',
+    oneTimeTemplate: '',
+    iterationTemplate: '',
     rdfPodUrl: 'https://example.org/my_pod/rdfsheet.ttl'
   };
 }
@@ -238,13 +236,12 @@ function exportRDFToStr() {
   const sheet = settingsContainer.settings.sheets[sheetSoeji];
   if (sheet) {
     console.log(`name: ${sheet.name}`);
-    console.log(`sheetType: ${sheet.sheetType}`);
     console.log(`repRange: ${sheet.repRange}`);
-    console.log(`convFuncs: ${JSON.stringify(sheet.convFuncs)}`);
     console.log(`prefixes: ${sheet.prefixes}`);
-    console.log(`template: ${sheet.template}`);
+    console.log(`oneTimeTemplate: ${sheet.oneTimeTemplate}`);
+    console.log(`iterationTemplate: ${sheet.iterationTemplate}`);
     console.log(`rdfPodUrl: ${sheet.rdfPodUrl}`);
-    if (sheet.sheetType==='repetitive-embedding') { // 反復埋め込み
+    if (sheet.repRange!=='') { // 反復埋め込みが必要
       const startCell = sheet.repRange.split(':')[0];
       const endCell = sheet.repRange.split(':')[1];
       const start = cellStrToColRow(startCell);
@@ -261,10 +258,8 @@ function exportRDFToStr() {
           console.log(`row=${row}, col=${col}, v=${v}`);
         }
       }
-      return 'ok';
-    } else { // 単純埋め込み
-      return 'ok';
     }
+    return 'ok';
   } else {
     alert('アクティブなシートがありません？！');
     return null;

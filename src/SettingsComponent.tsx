@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './SettingsComponent.module.css';
 import MyDialog from './MyDialog';
 import { getSelectedRange } from './util';
-import type { SheetType, Setting, Settings } from './util';
+import type { Setting, Settings } from './util';
 import { useAppData } from './AppDataContext';
 
 /*
@@ -27,12 +27,13 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
   const [ isImportPrefixOpen, setImportPrefixOpen ] = useState(false);
   const [ currentSheet, setCurrentSheet ] = useState<Setting>(settings.sheets[0]);
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
-  const [ sheetType, setSheetType ] = useState<SheetType>('repetitive-embedding');
   const [ sheetSettingsChanged, setSheetSettingsChanged ] = useState(false);
+  const [ iterationNeeded, setIterationNeeded ] = useState(false);
   const sheetPodURLTB = useRef<HTMLInputElement>(null);
   const sheetRepRangeTB = useRef<HTMLInputElement>(null);
   const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
-  const sheetTemplateTA = useRef<HTMLTextAreaElement>(null);
+  const sheetOneTimeTemplateTA = useRef<HTMLTextAreaElement>(null);
+  const sheetIterationTemplateTA = useRef<HTMLTextAreaElement>(null);
   const sheetRdfURLTB = useRef<HTMLInputElement>(null);
   const { appData } = useAppData();
 
@@ -57,20 +58,16 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     if (selected) {
       setCurrentSheet(selected);
       setSheetIdx(selected.index);
-      setSheetType(selected.sheetType);
+      setIterationNeeded(selected.repRange !== '');
       if (sheetRepRangeTB.current) sheetRepRangeTB.current.value = selected.repRange;
       if (sheetPrefixesTA.current) sheetPrefixesTA.current.value = selected.prefixes;
-      if (sheetTemplateTA.current) sheetTemplateTA.current.value = selected.template;
+      if (sheetOneTimeTemplateTA.current) sheetOneTimeTemplateTA.current.value = selected.oneTimeTemplate;
+      if (sheetIterationTemplateTA.current) sheetIterationTemplateTA.current.value = selected.iterationTemplate;
       if (sheetRdfURLTB.current) sheetRdfURLTB.current.value = selected.rdfPodUrl;
     } else {
       console.log(`GAHA: There is no sheet: index=${idx}???`);
     }
     
-  };
-
-  const handleSheetTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSheetType((event.target.value as SheetType));
-    setSheetSettingsChanged(true);
   };
 
   const importRepRange = () => {
@@ -96,12 +93,25 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     setImportPrefixOpen(false);
   };
 
+  const repSettingIsChanged = () => {
+    if (!(sheetRepRangeTB.current)) return;
+    if (sheetRepRangeTB.current.value === '')
+      setIterationNeeded(false);
+    else
+      setIterationNeeded(true);
+    setSheetSettingsChanged(true);
+  };
+
+  const someSettingIsChanged = () => {
+    setSheetSettingsChanged(true);
+  };
+
   const saveCurrentSheetSettings = () => {
     if (sheetPodURLTB.current) settings.fileSettings.podUrl = sheetPodURLTB.current.value;
-    currentSheet.sheetType = sheetType;
     if (sheetRepRangeTB.current) currentSheet.repRange = sheetRepRangeTB.current.value;
     if (sheetPrefixesTA.current) currentSheet.prefixes = sheetPrefixesTA.current.value;
-    if (sheetTemplateTA.current) currentSheet.template = sheetTemplateTA.current.value;
+    if (sheetOneTimeTemplateTA.current) currentSheet.oneTimeTemplate = sheetOneTimeTemplateTA.current.value;
+    if (sheetIterationTemplateTA.current) currentSheet.iterationTemplate = sheetIterationTemplateTA.current.value;
     if (sheetRdfURLTB.current) settings.fileSettings.podUrl = sheetRdfURLTB.current.value;
     onChange(settings);
     setSheetSettingsChanged(false);
@@ -127,68 +137,57 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
          <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
            {sheetSettingsChanged ? 'シート設定修正あり' : 'シート設定修正なし'}
          </span>
-         <button className={styles.saveBtn} onClick={saveCurrentSheetSettings}>設定変更</button>
+         <button className={styles.saveBtn}
+                 onClick={saveCurrentSheetSettings}
+                 disabled={!sheetSettingsChanged}>設定変更</button>
        </label>
       </div>
-      <div className={styles.typeSelect}>
-        <div className={styles.sheetType}>
-          <label>
-            <input type="radio"
-                   name="sheetType"
-                   value="repetitive-embedding"
-                   checked={sheetType==='repetitive-embedding'}
-                   onChange={handleSheetTypeChange}/>反復埋め込み
-            <div className={styles.repRangeDiv}>
-              反復範囲:
-              <input ref={sheetRepRangeTB} type="text" defaultValue={currentSheet.repRange}/>
-              <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
-            </div>
-          </label>
-        </div>
-        <div className={styles.simpleType}>
-          <label>
-            <input type="radio"
-                   name="sheetType"
-                   value="simple-embedding"
-                   checked={sheetType==='simple-embedding'}
-                   onChange={handleSheetTypeChange}/>単純埋め込み
-          </label>
-        </div>
-      </div>
-      <div className={styles.convFuncsDiv}>
-        <h4>変換関数</h4>
-        <p>未実装。</p>
+      <div className={styles.repRangeDiv}>
+        反復範囲:
+        <input ref={sheetRepRangeTB} type="text" defaultValue={currentSheet.repRange} onChange={repSettingIsChanged}/>
+        <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
       </div>
       <div className={styles.prefixDiv}>
-        <h4>
-          プレフィックス
+        <div>
+          <h4>プレフィックス</h4>
           <span className={styles.glue}></span>
           <button id="importPrefixBtn"
                   className={styles.importPrefixBtn}
                   onClick={()=>setImportPrefixOpen(true)}>
             プレフィックスを取り込む
           </button>
-          <MyDialog isVisible={isImportPrefixOpen}
-                    onClose={()=>setImportPrefixOpen(false)}>
-            <p>取り込みたいプレフィックスをクリックして下さい。</p>
-            { appData.prefixes.split("\n").map((line) => {
-              return <p onClick={importPrefix}>{line}</p>;
-            })}
-          </MyDialog>
-        </h4>
+        </div>
+        <MyDialog isVisible={isImportPrefixOpen}
+                  onClose={()=>setImportPrefixOpen(false)}>
+          <p>取り込みたいプレフィックスをクリックして下さい。</p>
+          { appData.prefixes.split("\n").map((line) => {
+            return <p onClick={importPrefix}>{line}</p>;
+          })}
+        </MyDialog>
+        
         <textarea ref={sheetPrefixesTA}
                   defaultValue={currentSheet.prefixes}
-                  className={styles.prefixTA}/>
+                  className={styles.prefixTA}
+                  onChange={someSettingIsChanged}/>
       </div>
       <div>
-        <h4>テンプレート</h4>
-        <textarea ref={sheetTemplateTA}
-                  defaultValue={currentSheet.template}
-                  className={styles.templateTA}/>
+        <h4>1回テンプレート</h4>
+        <textarea ref={sheetOneTimeTemplateTA}
+                  defaultValue={currentSheet.oneTimeTemplate}
+                  className={styles.oneTimeTemplateTA}
+                  onChange={someSettingIsChanged}/>
+      </div>
+      <div>
+        <h4>反復テンプレート</h4>
+        <textarea ref={sheetIterationTemplateTA}
+                  defaultValue={currentSheet.iterationTemplate}
+                  className={styles.iterationTemplateTA}
+                  onChange={someSettingIsChanged}
+                  disabled={!(iterationNeeded)}/>
       </div>
       <div className={styles.pathDiv}>
         <label htmlFor="rdfURLTB">RDF URL</label>
-        <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfPodUrl}/>
+        <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfPodUrl} onChange={someSettingIsChanged}/>
       </div>
     </div>
   );
