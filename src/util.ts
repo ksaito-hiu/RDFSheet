@@ -216,16 +216,40 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
   }
 }
 
+function importRDFFromStr(str: string) {
+console.log(`GAHA: ${str}`);
+  alert('importRDFFromStr. not implemented yet!');
+}
+
 // ローカルのファイルからRDFファイルの読み込み
 export async function importRDFFromLocal(): Promise<void> {
   updateSettings();
-  alert('importRDFFromLocal. not implemented yet!');
+  try {
+    const opts = {
+      types: [{
+        description: 'Turtle(RDF) file',
+        accept: {'text/turtle': ['.ttl']},
+      }],
+    };
+    const [handle] = await (window as any).showOpenFilePicker(opts);
+    const file = await handle.getFile();
+    const text = await file.text();
+    importRDFFromStr(text);
+  } catch(e) {
+    alert(`ファイルは開かれませんでした。${getErrorMessage(e)}`);
+  }
 }
 
 // ローカルのファイルからRDFファイルの読み込み
 export async function importRDFFromPod(podUrl: string): Promise<void> {
   updateSettings();
-  alert(`importRDFFromPod. url=${podUrl}, not implemented yet!`);
+  try {
+    const res = await fetch(podUrl);
+    const text = await res.text();
+    importRDFFromStr(text);
+  } catch(e) {
+    alert(`ファイルの読み込みに失敗しました。${getErrorMessage(e)}`);
+  }
 }
 
 function exportRDFToStr() {
@@ -259,27 +283,52 @@ function exportRDFToStr() {
         }
       }
     }
-    return 'ok';
+    return '<#a> <#b> "ok" .';
   } else {
     alert('アクティブなシートがありません？！');
     return null;
   }
 }
 
-// ローカルのファイルにRDFを書き出し
+// ローカルのファイルにRDF(Turtle)を書き出し
 export async function exportRDFToLocal(): Promise<void> {
   updateSettings();
-  alert('exportRDFToLocal!');
   const str = exportRDFToStr();
   console.log(str);
+  try {
+    const opts = {
+      suggestedName: 'rdfsheetfile.ttl',
+      types: [{
+        description: 'Turtle(RDF) file',
+        accept: {'text/turtle': ['.ttl']},
+      }],
+    };
+    const handle = await (window as any).showSaveFilePicker(opts);
+    const writable = await handle.createWritable();
+    await writable.write(str);
+    await writable.close();
+  } catch(e) {
+    alert(`RDFファイルは保存されませんでした。${getErrorMessage(e)}`);
+  }
 }
 
 // PodにRDFファイルをアップロード
 export async function exportRDFToPod(podUrl: string): Promise<void> {
   updateSettings();
-  alert(`exportRDFToPod! url=${podUrl}`);
   const str = exportRDFToStr();
   console.log(str);
+  try {
+    await fetch(podUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'text/turtle'
+      },
+      body: str
+    });
+    alert('RDFをエクスポートしました。');
+  } catch(e) {
+    alert(`RDFのエクスポートに失敗しました。${getErrorMessage(e)}`);
+  }
 }
 
 // ヘルプをオープン
