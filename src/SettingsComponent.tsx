@@ -34,6 +34,9 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
   const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
   const sheetOneTimeTemplateTA = useRef<HTMLTextAreaElement>(null);
   const sheetIterationTemplateTA = useRef<HTMLTextAreaElement>(null);
+  const sheetAdditionalImportUrlsTA = useRef<HTMLTextAreaElement>(null);
+  const sheetOneTimeImportSparqlTA = useRef<HTMLTextAreaElement>(null);
+  const sheetIterationImportSparqlTA = useRef<HTMLTextAreaElement>(null);
   const sheetRdfURLTB = useRef<HTMLInputElement>(null);
   const { appData } = useAppData();
 
@@ -63,6 +66,9 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
       if (sheetPrefixesTA.current) sheetPrefixesTA.current.value = selected.prefixes;
       if (sheetOneTimeTemplateTA.current) sheetOneTimeTemplateTA.current.value = selected.oneTimeTemplate;
       if (sheetIterationTemplateTA.current) sheetIterationTemplateTA.current.value = selected.iterationTemplate;
+      if (sheetAdditionalImportUrlsTA.current) sheetAdditionalImportUrlsTA.current.value = selected.additionalImportUrls;
+      if (sheetOneTimeImportSparqlTA.current) sheetOneTimeImportSparqlTA.current.value = selected.oneTimeImportSparql;
+      if (sheetIterationImportSparqlTA.current) sheetIterationImportSparqlTA.current.value = selected.iterationImportSparql;
       if (sheetRdfURLTB.current) sheetRdfURLTB.current.value = selected.rdfPodUrl;
     } else {
       console.log(`GAHA: There is no sheet: index=${idx}???`);
@@ -102,6 +108,10 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     setSheetSettingsChanged(true);
   };
 
+  const fileSettingIsChanged = () => {
+    setSheetSettingsChanged(true);
+  };
+
   const someSettingIsChanged = () => {
     setSheetSettingsChanged(true);
   };
@@ -112,6 +122,9 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     if (sheetPrefixesTA.current) currentSheet.prefixes = sheetPrefixesTA.current.value;
     if (sheetOneTimeTemplateTA.current) currentSheet.oneTimeTemplate = sheetOneTimeTemplateTA.current.value;
     if (sheetIterationTemplateTA.current) currentSheet.iterationTemplate = sheetIterationTemplateTA.current.value;
+    if (sheetAdditionalImportUrlsTA.current) currentSheet.additionalImportUrls = sheetAdditionalImportUrlsTA.current.value;
+    if (sheetOneTimeImportSparqlTA.current) currentSheet.oneTimeImportSparql = sheetOneTimeImportSparqlTA.current.value;
+    if (sheetIterationImportSparqlTA.current) currentSheet.iterationImportSparql = sheetIterationImportSparqlTA.current.value;
     if (sheetRdfURLTB.current) currentSheet.rdfPodUrl = sheetRdfURLTB.current.value;
     onChange(settings);
     setSheetSettingsChanged(false);
@@ -124,7 +137,7 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
         <h3>ファイル設定</h3>
         <div className={styles.filePathDiv}>
           <label htmlFor="fileURLTB">ファイルURL</label>
-          <input ref={sheetPodURLTB} type="text" defaultValue={settings.fileSettings.podUrl}/>
+          <input ref={sheetPodURLTB} type="text" defaultValue={settings.fileSettings.podUrl} onChange={fileSettingIsChanged}/>
         </div>
       </div>
       <div className={styles.selectedSheetDiv}>
@@ -184,6 +197,27 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
                   className={styles.iterationTemplateTA}
                   onChange={someSettingIsChanged}
                   disabled={!(iterationNeeded)}/>
+      </div>
+      <div>
+        <h4>追加インポートRDFのURL</h4>
+        <textarea ref={sheetAdditionalImportUrlsTA}
+                  defaultValue={currentSheet.additionalImportUrls}
+                  className={styles.additionalImportUrlsTA}
+                  onChange={someSettingIsChanged}/>
+      </div>
+      <div>
+        <h4>1回インポートSPARQL</h4>
+        <textarea ref={sheetOneTimeImportSparqlTA}
+                  defaultValue={currentSheet.oneTimeImportSparql}
+                  className={styles.oneTimeImportSparqlTA}
+                  onChange={someSettingIsChanged}/>
+      </div>
+      <div>
+        <h4>反復インポートSPARQL</h4>
+        <textarea ref={sheetIterationImportSparqlTA}
+                  defaultValue={currentSheet.iterationImportSparql}
+                  className={styles.iterationImportSparqlTA}
+                  onChange={someSettingIsChanged}/>
       </div>
       <div className={styles.pathDiv}>
         <label htmlFor="rdfURLTB">RDF URL</label>

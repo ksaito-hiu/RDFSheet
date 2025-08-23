@@ -42,6 +42,9 @@ export type Setting = {
   prefixes: string;
   oneTimeTemplate: string;
   iterationTemplate: string;
+  additionalImportUrls: string;
+  oneTimeImportSparql: string;
+  iterationImportSparql: string;
   rdfPodUrl: string;
 };
 
@@ -68,6 +71,9 @@ export const makeDummySheetData: ()=>Setting = () => {
     prefixes: '',
     oneTimeTemplate: '',
     iterationTemplate: '',
+    additionalImportUrls: '',
+    oneTimeImportSparql: '',
+    iterationImportSparql: '',
     rdfPodUrl: 'https://example.org/my_pod/rdfsheet.ttl'
   };
 }
@@ -301,8 +307,6 @@ function exportRDFToStr() {
       const endCell = sheet.repRange.split(':')[1];
       const start = cellStrToColRow(startCell);
       const end = cellStrToColRow(endCell);
-      console.log(`start=${JSON.stringify(start)}`);
-      console.log(`end=${JSON.stringify(end)}`);
       let skippedCount = 0;
       outer: for (let row=start.row; row<=end.row; row++) {
         let tmp2 = tmp;

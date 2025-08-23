@@ -83,6 +83,27 @@
     margin: auto;
 }
 
+.additionalImportUrlsTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.oneTimeImportSparqlTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.iterationImportSparqlTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
 .pathDiv {
     display: flex;
     padding: 0.5em;
