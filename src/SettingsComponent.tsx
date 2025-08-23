@@ -112,7 +112,7 @@ const SettingsComponent: React.FC<Props> = ({ settings, onChange }) => {
     if (sheetPrefixesTA.current) currentSheet.prefixes = sheetPrefixesTA.current.value;
     if (sheetOneTimeTemplateTA.current) currentSheet.oneTimeTemplate = sheetOneTimeTemplateTA.current.value;
     if (sheetIterationTemplateTA.current) currentSheet.iterationTemplate = sheetIterationTemplateTA.current.value;
-    if (sheetRdfURLTB.current) settings.fileSettings.podUrl = sheetRdfURLTB.current.value;
+    if (sheetRdfURLTB.current) currentSheet.rdfPodUrl = sheetRdfURLTB.current.value;
     onChange(settings);
     setSheetSettingsChanged(false);
     alert("シートの設定を変更しました。");

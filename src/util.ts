@@ -259,6 +259,7 @@ function exportRDFToStr() {
   );
   const sheet = settingsContainer.settings.sheets[sheetSoeji];
   if (sheet) {
+    luckysheet.recalc(); // =NOW()などの関数がこの瞬間に更新されるように。
     console.log(`name: ${sheet.name}`);
     console.log(`repRange: ${sheet.repRange}`);
     console.log(`prefixes: ${sheet.prefixes}`);
