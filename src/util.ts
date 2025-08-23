@@ -259,32 +259,73 @@ function exportRDFToStr() {
   );
   const sheet = settingsContainer.settings.sheets[sheetSoeji];
   if (sheet) {
-    luckysheet.recalc(); // =NOW()などの関数がこの瞬間に更新されるように。
-    console.log(`name: ${sheet.name}`);
-    console.log(`repRange: ${sheet.repRange}`);
-    console.log(`prefixes: ${sheet.prefixes}`);
-    console.log(`oneTimeTemplate: ${sheet.oneTimeTemplate}`);
-    console.log(`iterationTemplate: ${sheet.iterationTemplate}`);
-    console.log(`rdfPodUrl: ${sheet.rdfPodUrl}`);
-    if (sheet.repRange!=='') { // 反復埋め込みが必要
+    //luckysheet.recalc(); // =NOW()などの関数がこの瞬間に更新されるように。
+    const setting = {
+      type: 'v', // 'v'と'm'が可能
+      order: sheetSoeji, // worksheetのorder？？？
+    };
+    // プレフィックス追加
+    let result = '';
+    result += sheet.prefixes;
+    // 一回テンプレートの処理
+    let phs0 = sheet.oneTimeTemplate.matchAll(/<<([A-Za-z]+)(\d+)>>/g);
+    let phs1 = [...phs0].map(m => `${m[1]}${m[2]}`);
+    let map: any = {};
+    for (const ph of phs1) {
+      const rc = cellStrToColRow(ph);
+      map[ph] = luckysheet.getCellValue(rc.row,rc.col,setting);
+    }
+    let tmp = sheet.oneTimeTemplate;
+    for (const ph of Object.keys(map)) {
+      tmp = tmp.replace(`<<${ph}>>`,map[ph]);
+    }
+    result += tmp;
+    // 反復埋め込みが必要な場合の処理
+    if (sheet.repRange!=='') {
+      // まずは繰り返しで変らない埋め込みの処理
+      phs0 = sheet.oneTimeTemplate.matchAll(/<<([A-Za-z]+)(\d+)>>/g);
+      phs1 = [...phs0].map(m => `${m[1]}${m[2]}`);
+      map = {};
+      for (const ph of phs1) {
+        const rc = cellStrToColRow(ph);
+        map[ph] = luckysheet.getCellValue(rc.row,rc.col,setting);
+      }
+      tmp = sheet.iterationTemplate;
+      for (const ph of Object.keys(map)) {
+        tmp = tmp.replace(`<<${ph}>>`,map[ph]);
+      }
+      // 繰り返しで変化する埋め込みの処理
+      phs0 = sheet.iterationTemplate.matchAll(/<<([A-Za-z]+)>>/g);
+      phs1 = [...phs0].map(m => m[1]);
       const startCell = sheet.repRange.split(':')[0];
       const endCell = sheet.repRange.split(':')[1];
       const start = cellStrToColRow(startCell);
       const end = cellStrToColRow(endCell);
       console.log(`start=${JSON.stringify(start)}`);
       console.log(`end=${JSON.stringify(end)}`);
-      const setting = {
-        type: 'v', // 'v'と'm'が可能
-        order: sheetSoeji, // worksheetのorder？？？
-      };
-      for (let row=start.row; row<=end.row; row++) {
-        for (let col=start.col; col<=end.col; col++) {
-          const v = luckysheet.getCellValue(row,col,setting);
-          console.log(`row=${row}, col=${col}, v=${v}`);
+      let skippedCount = 0;
+      outer: for (let row=start.row; row<=end.row; row++) {
+        let tmp2 = tmp;
+        map = {};
+        for (const ph of phs1) {
+          const col = alphabetToColumnNum(ph);
+          map[ph] = luckysheet.getCellValue(row,col,setting);
+          if (map[ph] == null) {
+            map = {};
+            skippedCount++;
+            continue outer;
+          }
         }
+        for (const ph of Object.keys(map)) {
+          tmp2 = tmp2.replace(`<<${ph}>>`,map[ph]);
+        }
+        result += tmp2;
+      }
+      if (skippedCount!==0) {
+        alert(`繰り返し処理中に必要なデータが無かったためにとばした行が${skippedCount}行ありました。`);
       }
     }
-    return '<#a> <#b> "ok" .';
+    return result;
   } else {
     alert('アクティブなシートがありません？！');
     return null;
@@ -295,7 +336,6 @@ function exportRDFToStr() {
 export async function exportRDFToLocal(): Promise<void> {
   updateSettings();
   const str = exportRDFToStr();
-  console.log(str);
   try {
     const opts = {
       suggestedName: 'rdfsheetfile.ttl',
@@ -317,7 +357,6 @@ export async function exportRDFToLocal(): Promise<void> {
 export async function exportRDFToPod(podUrl: string): Promise<void> {
   updateSettings();
   const str = exportRDFToStr();
-  console.log(str);
   try {
     await fetch(podUrl, {
       method: 'PUT',
@@ -371,7 +410,7 @@ export const alphabetToColumnNum = (str: string) => {
 
 // セルを表す文字列から列と行を計算する
 export const cellStrToColRow: (cell: string)=>{col: number; row: number} = (cell: string) => {
-  const match = cell.match(/^([A-Z]+)(\d+)$/i);
+  const match = cell.match(/^([A-Za-z]+)(\d+)$/i);
   if (!match)
     throw new Error("無効なセル式です。");
 
@@ -400,11 +439,4 @@ export const getSelectedRange = () => {
     range: rs[0],
     sheetIdx: idx
   };
-};
-
-export const evalFuncs: (f: {in:string; out:string;}[][], fNum: number, input: string) => string | null = (f,fNum,input) => {
-  return f[fNum].reduce(
-    (acc: string | null, cur) => acc?acc:(cur.in===input)?cur.out:acc,
-    null
-  );
 };
