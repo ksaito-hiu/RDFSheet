@@ -267,29 +267,54 @@ async function importRDFFromStr(str: string, base: string) {
       }
       const oneTimeSparql = `BASE <${base}>\n`+sheet.oneTimeImportSparql;
       const bindingsStream = await engine.queryBindings(oneTimeSparql,{sources});
-      //const metadata = await bindingsStream.metadata();
       const bindings = await bindingsStream.toArray(); // 面倒なんで同期で
+      const setting = {isRefresh:true}; // luckysheetで書き込む時の設定。
       // oneTimeなので[0]だけ使う
       if (bindings.length >= 1) {
         for (const [key,value] of bindings[0]) {
           console.log(`GAHA: ${key.value}<=${value.value}`);
+          const c = cellStrToColRow(key.value);
+          luckysheet.setCellValue(c.row,c.col,value.value,setting);
         }
       } else {
         alert('The result of oneTimeSparql is empty.');
       }
-      const iterationImportSparql = `BASE <${base}>\n`+sheet.iterationImportSparql;
-      const bindingsStream2 = await engine.queryBindings(iterationImportSparql,{sources});
-      //const metadata2 = await bindingsStream2.metadata();
-      const bindings2 = await bindingsStream2.toArray(); // 面倒なんで同期で
-      alert(`The result count of iterationImportSparql is ${bindings2.length}.`);
-      for (const binding of bindings2) {
-        for (const [key,value] of binding) {
-          console.log(`GAHA2: ${key.value}<=${value.value}`);
+      // 反復埋め込みが必要な場合の処理
+      if (sheet.repRange!=='') {
+        const startCell = sheet.repRange.split(':')[0];
+        const endCell = sheet.repRange.split(':')[1];
+        const start = cellStrToColRow(startCell);
+        const end = cellStrToColRow(endCell);
+
+        const iterationImportSparql = `BASE <${base}>\n`+sheet.iterationImportSparql;
+        //const bindingsStream2 = await engine.queryBindings(iterationImportSparql,{sources});
+        const result = await engine.query(iterationImportSparql,{sources});
+        if (result.resultType !== 'bindings')
+          throw new Error('iterationImportSparql is not SELECT query.');
+        const metadata = await result.metadata();
+        const bindingsStream2 = await result.execute();
+        const bindings2 = await bindingsStream2.toArray(); // 面倒なんで同期で
+        alert(`The result count of iterationImportSparql is ${bindings2.length}.`);
+
+        let variables = metadata.variables;
+        for (let row=start.row+1; row<=end.row+1; row++) { // rowは1から数える方針
+          const binding = bindings2.shift();
+          if (binding != null) {
+            for (const [key,value] of binding) {
+              const c = cellStrToColRow(`${key.value}${row}`);
+              luckysheet.setCellValue(c.row,c.col,value.value,setting);
+            }
+          } else {
+            for (const col of variables) {
+              const c = cellStrToColRow(`${col.value}${row}`);
+              luckysheet.setCellValue(c.row,c.col,'',setting);
+            }
+          }
         }
       }
+      luckysheet.refreshFormula();
     } catch(e) {
-      // どうしよう
-      throw e;
+      throw new Error(`インポートエラー`);
     }
   } else {
     alert('アクティブなシートがありません？！');
