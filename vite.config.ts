@@ -16,9 +16,10 @@ export default defineConfig({
           if (id.includes('node_modules/@inrupt')) {
             return 'inrupt';
           }
-          if (id.includes('node_modules/@comunica')) {
-            return 'comunica';
-          }
+          // Comunicaを分割したらPWAが起動しなくなったので
+          //if (id.includes('node_modules/@comunica')) {
+          //  return 'comunica';
+          //}
           if (id.includes('node_modules')) {
             return 'vendor';
           }
