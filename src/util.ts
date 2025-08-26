@@ -1,6 +1,6 @@
 //import { handleIncomingRedirect, login, logout, authFetch } from '@inrupt/solid-client-authn-browser';
 const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidClientAuthentication;
-// import { QueryEngine } from '@comunica/query-sparql'; // 下で動的インポートにした。
+import { QueryEngine } from '@comunica/query-sparql'; // 下で動的インポートにしたらエラーになった。
 import type { SourceType } from '@comunica/types';
 import * as N3 from 'n3';
 
@@ -248,8 +248,8 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
 }
 
 async function importRDFFromStr(str: string, base: string) {
-  // 動的インポートにしておく
-  const { QueryEngine } = await import('@comunica/query-sparql');
+  // PWAで動的インポートにしたらエラーになった
+  //const { QueryEngine } = await import('@comunica/query-sparql');
 
   const sheetSoeji: number = settingsContainer.settings.sheets.reduce(
     (acc: number, cur: Setting, soeji) => acc!=-1?acc:((cur.status===1)?soeji:acc),
