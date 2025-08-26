@@ -1,7 +1,32 @@
 //import { handleIncomingRedirect, login, logout, authFetch } from '@inrupt/solid-client-authn-browser';
 const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidClientAuthentication;
+// import { QueryEngine } from '@comunica/query-sparql'; // 下で動的インポートにした。
+import type { SourceType } from '@comunica/types';
+import * as N3 from 'n3';
 
 export const authFetch = fetch;
+
+/*
+ * N3のストアに対してturtle形式で記述されたRDFデータを追加します。
+ * @param {string} turtle 文字列でTurtle記法のRDF
+ * @param {N3.Store} store N3.jsライブラリのストア
+ * @param {string} base Turtleを解釈する時のベースURL
+ * @return {Object.<string, string>} プレフィックス
+ */
+async function appendTurtleToStore(turtle: string, store: N3.Store, base: string) {
+  return new Promise((resolve, reject) => {
+    const opt = { format: 'text/turtle', baseIRI: base };
+    const parser = new N3.Parser(opt);
+    parser.parse(turtle, (error, quad, prefixes) => {
+      if (error)
+        reject(error);
+      else if (quad)
+        store.addQuad(quad);
+      else
+        resolve(prefixes);
+    });
+  });
+}
 
 export const myLogin = async (idp: string) => {
   await login({
@@ -171,7 +196,7 @@ export async function loadSheetsFromLocal(): Promise<void> {
 // PodからRDFSheetファイルを開く
 export async function loadSheetsFromPod(podUrl: string): Promise<void> {
   try {
-    const res = await fetch(podUrl);
+    const res = await authFetch(podUrl);
     const json = await res.json();
     loadSheetsFromJSON(json);
   } catch(e) {
@@ -209,7 +234,7 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
       luckysheetfile: luckysheet.getluckysheetfile(),
       settings: JSON.parse(JSON.stringify(settingsContainer.settings))
     };
-    await fetch(podUrl, {
+    await authFetch(podUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/x-rdfsheet+json'
@@ -222,9 +247,54 @@ export async function saveSheetsToPod(podUrl: string): Promise<void> {
   }
 }
 
-function importRDFFromStr(str: string) {
-console.log(`GAHA: ${str}`);
-  alert('importRDFFromStr. not implemented yet!');
+async function importRDFFromStr(str: string, base: string) {
+  // 動的インポートにしておく
+  const { QueryEngine } = await import('@comunica/query-sparql');
+
+  const sheetSoeji: number = settingsContainer.settings.sheets.reduce(
+    (acc: number, cur: Setting, soeji) => acc!=-1?acc:((cur.status===1)?soeji:acc),
+    -1
+  );
+  const sheet = settingsContainer.settings.sheets[sheetSoeji];
+  if (sheet) {
+    try {
+      const engine = new QueryEngine();
+      const store = new N3.Store();
+      await appendTurtleToStore(str, store, base);
+      const sources: [SourceType] = [store];
+      for (const l of sheet.additionalImportUrls.split('\n')) {
+        if (l !== '') sources.push(l);
+      }
+      const oneTimeSparql = `BASE <${base}>\n`+sheet.oneTimeImportSparql;
+      const bindingsStream = await engine.queryBindings(oneTimeSparql,{sources});
+      //const metadata = await bindingsStream.metadata();
+      const bindings = await bindingsStream.toArray(); // 面倒なんで同期で
+      // oneTimeなので[0]だけ使う
+      if (bindings.length >= 1) {
+        for (const [key,value] of bindings[0]) {
+          console.log(`GAHA: ${key.value}<=${value.value}`);
+        }
+      } else {
+        alert('The result of oneTimeSparql is empty.');
+      }
+      const iterationImportSparql = `BASE <${base}>\n`+sheet.iterationImportSparql;
+      const bindingsStream2 = await engine.queryBindings(iterationImportSparql,{sources});
+      //const metadata2 = await bindingsStream2.metadata();
+      const bindings2 = await bindingsStream2.toArray(); // 面倒なんで同期で
+      alert(`The result count of iterationImportSparql is ${bindings2.length}.`);
+      for (const binding of bindings2) {
+        for (const [key,value] of binding) {
+          console.log(`GAHA2: ${key.value}<=${value.value}`);
+        }
+      }
+    } catch(e) {
+      // どうしよう
+      throw e;
+    }
+  } else {
+    alert('アクティブなシートがありません？！');
+    return null;
+  }
 }
 
 // ローカルのファイルからRDFファイルの読み込み
@@ -240,7 +310,8 @@ export async function importRDFFromLocal(): Promise<void> {
     const [handle] = await (window as any).showOpenFilePicker(opts);
     const file = await handle.getFile();
     const text = await file.text();
-    importRDFFromStr(text);
+    const base = `file:///C:/Users/me/RDFSheet/${file.name}`; // どうしてもPATHは得られないので。
+    await importRDFFromStr(text,base);
   } catch(e) {
     alert(`ファイルは開かれませんでした。${getErrorMessage(e)}`);
   }
@@ -250,9 +321,9 @@ export async function importRDFFromLocal(): Promise<void> {
 export async function importRDFFromPod(podUrl: string): Promise<void> {
   updateSettings();
   try {
-    const res = await fetch(podUrl);
+    const res = await authFetch(podUrl);
     const text = await res.text();
-    importRDFFromStr(text);
+    await importRDFFromStr(text,podUrl);
   } catch(e) {
     alert(`ファイルの読み込みに失敗しました。${getErrorMessage(e)}`);
   }
@@ -362,7 +433,7 @@ export async function exportRDFToPod(podUrl: string): Promise<void> {
   updateSettings();
   const str = exportRDFToStr();
   try {
-    await fetch(podUrl, {
+    await authFetch(podUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'text/turtle'

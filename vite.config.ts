@@ -5,7 +5,27 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/RDFSheet/',
-  build: { outDir: 'docs' },
+  build: {
+    outDir: 'docs',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react')) {
+            return 'react';
+          }
+          if (id.includes('node_modules/@inrupt')) {
+            return 'inrupt';
+          }
+          if (id.includes('node_modules/@comunica')) {
+            return 'comunica';
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
