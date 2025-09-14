@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { openHelp, openAbout, updateSettings, settingsContainer } from './util';
 import type { Settings } from './util';
-import './App.css';
+import styles from './App.module.css';
 import { AppDataProvider } from './AppDataContext';
 import LoginPane from './LoginPane';
 import Menu from './Menu';
 import ToggleDiv from './ToggleDiv';
 import MyDialog from './MyDialog';
 import Luckysheet from './Luckysheet';
+import Export from './Export';
+import Import from './Import';
 import SettingsComponent from './SettingsComponent';
 import AppSettings from './AppSettings';
 import LoadComponent from './LoadComponent';
@@ -18,6 +20,8 @@ import ExportComponent from './ExportComponent';
 const App: React.FC = () => {
   const [settings, setSettings] = useState<Settings>(settingsContainer.settings);
   const [isSheetsActive, setSheetsActive] = useState(true);
+  const [isExportActive, setExportActive] = useState(false);
+  const [isImportActive, setImportActive] = useState(false);
   const [isSettingsActive, setSettingsActive] = useState(false);
   const [isAppSettingsActive, setAppSettingsActive] = useState(false);
   const [isLoadOpen, setLoadOpen] = useState(false);
@@ -30,15 +34,21 @@ const App: React.FC = () => {
       setSheetsActive(true);
       setSettingsActive(false);
       setAppSettingsActive(false);
+setExportActive(false);
+setImportActive(false);
     } else if (selected === 'settings') {
       setSettings(updateSettings());
       setSheetsActive(false);
       setSettingsActive(true);
       setAppSettingsActive(false);
+setExportActive(false);
+setImportActive(false);
     } else if (selected === 'appSettings') {
       setSheetsActive(false);
       setSettingsActive(false);
       setAppSettingsActive(true);
+setExportActive(false);
+setImportActive(false);
     } else if (selected === 'load') {
       setLoadOpen(true);
     } else if (selected === 'save') {
@@ -60,12 +70,24 @@ const App: React.FC = () => {
     <AppDataProvider>
       <header>
         <Menu onSelect={selectedListener} />
-        <LoginPane/>
+        <div className={styles.headerPanels}>
+          <LoginPane/>
+          <div>
+            <button onClick={()=>{setExportActive(true);setSheetsActive(false);}}>Export</button>
+            <button onClick={()=>{setImportActive(true);setSheetsActive(false);}}>Import</button>
+          </div>
+        </div>
       </header>
       <main>
         <ToggleDiv isVisible={isSheetsActive}>
           <Luckysheet onLoad={(ss)=>setSettings(ss)}/>
         </ToggleDiv>
+        { isExportActive === true ? (
+          <Export settings={settings} onChange={(ss)=>setSettings(ss)}/>
+        ) : null }
+        { isImportActive === true ? (
+          <Import settings={settings} onChange={(ss)=>setSettings(ss)}/>
+        ) : null }
         { isSettingsActive === true ? (
           <SettingsComponent settings={settings} onChange={(ss)=>setSettings(ss)}/>
         ) : null }

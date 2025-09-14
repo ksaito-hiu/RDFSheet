@@ -1,0 +1,115 @@
+/* Settings.module.css */
+
+.allSettings {
+    width: 95%;
+    height: 95%; /* 100% ??? */
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.allSettings button {
+    margin: 0.3em;
+    padding: 0.1em 0.3em;
+    background: lightgray;
+    border-radius: 2px;
+}
+
+.allSettings h4 {
+    margin: 0.2em;
+    padding: 0.2em;
+}
+
+.title h3 {
+    font-size: 2em;
+    margin: 0;
+}
+
+.filePathDiv {
+    margin: 0.3em;
+    display: flex;
+}
+
+.filePathDiv input {
+    flex-grow: 1;
+}
+
+.selectedSheetDiv {
+    font-size: 1.5em;
+    margin: 0.3em;
+}
+
+.selectedSheetDiv select {
+    font-size: 1.0em;
+}
+
+.saveBtn {
+    font-size: 1.0em;
+}
+
+.repRangeDiv {
+    
+}
+
+.prefixDiv div {
+    display: flex;
+}
+
+.prefixDiv div .glue {
+    flex-grow: 1;
+}
+
+.prefixTA {
+    display: block;
+    width: 98%;
+    height: 3em;
+    margin: auto;
+}
+
+.importPrefixBtn {
+
+}
+
+.oneTimeTemplateTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.iterationTemplateTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.additionalImportUrlsTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.oneTimeImportSparqlTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.iterationImportSparqlTA {
+    display: block;
+    width: 98%;
+    height: 10em;
+    margin: auto;
+}
+
+.pathDiv {
+    display: flex;
+    padding: 0.5em;
+}
+
+.pathDiv input {
+    flex-grow: 1;
+}
+

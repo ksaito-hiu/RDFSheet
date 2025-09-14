@@ -1,18 +1,13 @@
-body {
-  margin: 0;
-}
-
-#root {
-  margin: 0;
-  padding: 0;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
 
 header {
   display: flex;
   flex-direction: row;
+  align-items: center;
+}
+
+.headerPanels {
+  display: flex;
+  flex-direction: column;
 }
 
 main {
