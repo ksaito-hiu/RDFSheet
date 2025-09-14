@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Export.module.css';
 import MyDialog from './MyDialog';
+import ExportComponent from './ExportComponent';
 import { getSelectedRange } from './util';
 import type { Setting, Settings } from './util';
 import { useAppData } from './AppDataContext';
 
 /*
- * 設定画面のコンポーネント。デフォルトでLuckySheetのUIが
- * 先に表示済みで、このSettingsコンポーネットが表示される
+ * RDFへのエクスポートの設定と実際のエクスポートをするための
+ * コンポーネント。デフォルトでLuckySheetのUIが
+ * 先に表示済みで、このコンポーネットが表示される
  * タイミングでは設定のデータが読み込まれて準備が整っている
  * ことが前提になっている。また、このコンポーネントはApp.tsx
- * にてisSettingsActive===trueの時だけマウントされるのだが、
+ * にてisExportActive===trueの時だけマウントされるのだが、
  * そのマウントのタイミングでLuckySheetのシートの追加・削除、
  * シート名変更などに対応する設定の更新をする。美しくない気が
  * するけど、今のところそんな仕組みだというのが重要。ただ、
@@ -29,6 +31,7 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
   const [ sheetSettingsChanged, setSheetSettingsChanged ] = useState(false);
   const [ iterationNeeded, setIterationNeeded ] = useState(false);
+  const [isExportOpen, setExportOpen] = useState(false);
   const sheetPodURLTB = useRef<HTMLInputElement>(null);
   const sheetRepRangeTB = useRef<HTMLInputElement>(null);
   const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
@@ -108,10 +111,6 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
     setSheetSettingsChanged(true);
   };
 
-  const fileSettingIsChanged = () => {
-    setSheetSettingsChanged(true);
-  };
-
   const someSettingIsChanged = () => {
     setSheetSettingsChanged(true);
   };
@@ -133,30 +132,25 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
 
   return(
     <div className={styles.allSettings}>
-      <div className={styles.title}>
-        <h3>ファイル設定</h3>
-        <div className={styles.filePathDiv}>
-          <label htmlFor="fileURLTB">ファイルURL</label>
-          <input ref={sheetPodURLTB} type="text" defaultValue={settings.fileSettings.podUrl} onChange={fileSettingIsChanged}/>
-        </div>
-      </div>
+      <h1>エクスポート</h1>
       <div className={styles.selectedSheetDiv}>
-       <label>設定するシート: 
-         <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
-           {settings.sheets.map((setting) => (
-             <option value={setting.index} key={setting.index}>{setting.name}</option>
-           ))}
-         </select>
-         <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
-           {sheetSettingsChanged ? 'シート設定修正あり' : 'シート設定修正なし'}
-         </span>
-         <button className={styles.saveBtn}
-                 onClick={saveCurrentSheetSettings}
-                 disabled={!sheetSettingsChanged}>設定変更</button>
-       </label>
+        <label>設定するシート: 
+          <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
+            {settings.sheets.map((setting) => (
+              <option value={setting.index} key={setting.index}>{setting.name}</option>
+            ))}
+          </select>
+          <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
+            {sheetSettingsChanged ? 'シートのエクスポート設定の変更あり' : 'シートのエクスポート設定の変更なし'}
+          </span>
+          <button className={styles.saveBtn}
+                  onClick={saveCurrentSheetSettings}
+                  disabled={!sheetSettingsChanged}>設定変更</button>
+          <button onClick={()=>setExportOpen(true)}>エクスポート</button>
+        </label>
       </div>
       <div className={styles.repRangeDiv}>
-        反復範囲:
+        反復範囲(インポートとの共有設定):
         <input ref={sheetRepRangeTB} type="text" defaultValue={currentSheet.repRange} onChange={repSettingIsChanged}/>
         <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
       </div>
@@ -198,31 +192,14 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
                   onChange={someSettingIsChanged}
                   disabled={!(iterationNeeded)}/>
       </div>
-      <div>
-        <h4>追加インポートRDFのURL</h4>
-        <textarea ref={sheetAdditionalImportUrlsTA}
-                  defaultValue={currentSheet.additionalImportUrls}
-                  className={styles.additionalImportUrlsTA}
-                  onChange={someSettingIsChanged}/>
-      </div>
-      <div>
-        <h4>1回インポートSPARQL</h4>
-        <textarea ref={sheetOneTimeImportSparqlTA}
-                  defaultValue={currentSheet.oneTimeImportSparql}
-                  className={styles.oneTimeImportSparqlTA}
-                  onChange={someSettingIsChanged}/>
-      </div>
-      <div>
-        <h4>反復インポートSPARQL</h4>
-        <textarea ref={sheetIterationImportSparqlTA}
-                  defaultValue={currentSheet.iterationImportSparql}
-                  className={styles.iterationImportSparqlTA}
-                  onChange={someSettingIsChanged}/>
-      </div>
       <div className={styles.pathDiv}>
-        <label htmlFor="rdfURLTB">RDF URL</label>
+        <label htmlFor="rdfURLTB">RDF URL(インポートとの共通設定)</label>
         <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfPodUrl} onChange={someSettingIsChanged}/>
       </div>
+      <MyDialog isVisible={isExportOpen} onClose={()=>setExportOpen(false)}>
+        <ExportComponent settings={settings}
+                         onExported={()=>setExportOpen(false)}/>
+      </MyDialog>
     </div>
   );
 };

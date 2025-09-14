@@ -1,0 +1,33 @@
+/* BookSettings.module.css */
+
+.allBookSettings {
+    width: 95%;
+    height: 95%; /* 100% ??? */
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.allBookSettings button {
+    margin: 0.3em;
+    padding: 0.1em 0.3em;
+    background: lightgray;
+    border-radius: 2px;
+}
+
+.title h3 {
+    font-size: 2em;
+    margin: 0;
+}
+
+.filePathDiv {
+    margin: 0.3em;
+    display: flex;
+}
+
+.filePathDiv input {
+    flex-grow: 1;
+}
+
+.saveBtn {
+    font-size: 1.0em;
+}

@@ -19,11 +19,6 @@
     padding: 0.2em;
 }
 
-.title h3 {
-    font-size: 2em;
-    margin: 0;
-}
-
 .filePathDiv {
     margin: 0.3em;
     display: flex;

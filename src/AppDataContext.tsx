@@ -9,9 +9,17 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const RDFSheetLocalStorageKey = 'RDFSheetLocalStorageKey';
 const localStorage = (window as any).localStorage;
 
+export type ClientID = {
+  name: string;
+  provider: string;
+  id: string;
+  secret: string;
+}
+
 export type AppData = {
   prefixes: string; // 1行に1プレフィックス宣言
   idp: string; // ログインのためのデフォルトのidp
+  clientIDs: ClientID[]; // clientSecretが必要な時の情報
 };
 
 type AppDataContextType = {
@@ -19,9 +27,10 @@ type AppDataContextType = {
   updateAppData: (newAppData: Partial<AppData>) => void;
 };
 
-const defaultAppData: AppData = {
+export const defaultAppData: AppData = {
   prefixes: '@prefix dc: <http://purl.org/dc/terms/> .',
-  idp: 'https://solidcommunity.net'
+  idp: 'https://solidcommunity.net',
+  clientIDs: []
 };
 
 const AppDataContext = createContext<AppDataContextType | undefined>(undefined);

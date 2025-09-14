@@ -3,14 +3,15 @@ import styles from './Export.module.css';
 import MyDialog from './MyDialog';
 import { getSelectedRange } from './util';
 import type { Setting, Settings } from './util';
-import { useAppData } from './AppDataContext';
+import ImportComponent from './ImportComponent';
 
 /*
- * 設定画面のコンポーネント。デフォルトでLuckySheetのUIが
- * 先に表示済みで、このSettingsコンポーネットが表示される
+ * RDFからのインポートの設定と実際の画面のインポートをするための
+ * コンポーネント。デフォルトでLuckySheetのUIが
+ * 先に表示済みで、このコンポーネットが表示される
  * タイミングでは設定のデータが読み込まれて準備が整っている
  * ことが前提になっている。また、このコンポーネントはApp.tsx
- * にてisSettingsActive===trueの時だけマウントされるのだが、
+ * にてisImportActive===trueの時だけマウントされるのだが、
  * そのマウントのタイミングでLuckySheetのシートの追加・削除、
  * シート名変更などに対応する設定の更新をする。美しくない気が
  * するけど、今のところそんな仕組みだというのが重要。ただ、
@@ -24,11 +25,10 @@ type Props = {
 };
 
 const Export: React.FC<Props> = ({ settings, onChange }) => {
-  const [ isImportPrefixOpen, setImportPrefixOpen ] = useState(false);
   const [ currentSheet, setCurrentSheet ] = useState<Setting>(settings.sheets[0]);
   const [ sheetIdx, setSheetIdx ] = useState<string>('iTha4zah'); // 適当
   const [ sheetSettingsChanged, setSheetSettingsChanged ] = useState(false);
-  const [ iterationNeeded, setIterationNeeded ] = useState(false);
+  const [isImportOpen, setImportOpen] = useState(false);
   const sheetPodURLTB = useRef<HTMLInputElement>(null);
   const sheetRepRangeTB = useRef<HTMLInputElement>(null);
   const sheetPrefixesTA = useRef<HTMLTextAreaElement>(null);
@@ -38,7 +38,6 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
   const sheetOneTimeImportSparqlTA = useRef<HTMLTextAreaElement>(null);
   const sheetIterationImportSparqlTA = useRef<HTMLTextAreaElement>(null);
   const sheetRdfURLTB = useRef<HTMLInputElement>(null);
-  const { appData } = useAppData();
 
   useEffect(() => {
     const selected: string | null = settings.sheets.reduce(
@@ -61,7 +60,6 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
     if (selected) {
       setCurrentSheet(selected);
       setSheetIdx(selected.index);
-      setIterationNeeded(selected.repRange !== '');
       if (sheetRepRangeTB.current) sheetRepRangeTB.current.value = selected.repRange;
       if (sheetPrefixesTA.current) sheetPrefixesTA.current.value = selected.prefixes;
       if (sheetOneTimeTemplateTA.current) sheetOneTimeTemplateTA.current.value = selected.oneTimeTemplate;
@@ -90,25 +88,8 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
     setSheetSettingsChanged(true);
   };
 
-  const importPrefix = (e: any) => {
-    if (!(sheetPrefixesTA.current)) return;
-    if (!(sheetPrefixesTA.current.value.endsWith('\n')))
-      sheetPrefixesTA.current.value += '\n';
-    sheetPrefixesTA.current.value += e.target.textContent;
-    setSheetSettingsChanged(true);
-    setImportPrefixOpen(false);
-  };
-
   const repSettingIsChanged = () => {
     if (!(sheetRepRangeTB.current)) return;
-    if (sheetRepRangeTB.current.value === '')
-      setIterationNeeded(false);
-    else
-      setIterationNeeded(true);
-    setSheetSettingsChanged(true);
-  };
-
-  const fileSettingIsChanged = () => {
     setSheetSettingsChanged(true);
   };
 
@@ -133,70 +114,27 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
 
   return(
     <div className={styles.allSettings}>
-      <div className={styles.title}>
-        <h3>ファイル設定</h3>
-        <div className={styles.filePathDiv}>
-          <label htmlFor="fileURLTB">ファイルURL</label>
-          <input ref={sheetPodURLTB} type="text" defaultValue={settings.fileSettings.podUrl} onChange={fileSettingIsChanged}/>
-        </div>
-      </div>
+      <h1>インポート</h1>
       <div className={styles.selectedSheetDiv}>
-       <label>設定するシート: 
-         <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
-           {settings.sheets.map((setting) => (
-             <option value={setting.index} key={setting.index}>{setting.name}</option>
-           ))}
-         </select>
-         <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
-           {sheetSettingsChanged ? 'シート設定修正あり' : 'シート設定修正なし'}
-         </span>
-         <button className={styles.saveBtn}
-                 onClick={saveCurrentSheetSettings}
-                 disabled={!sheetSettingsChanged}>設定変更</button>
-       </label>
+        <label>設定するシート: 
+          <select value={sheetIdx} onChange={(e)=>changeSelectedSheet(e.target.value)} name="selectedSheet">
+            {settings.sheets.map((setting) => (
+              <option value={setting.index} key={setting.index}>{setting.name}</option>
+            ))}
+          </select>
+          <span style={{color: sheetSettingsChanged ? 'red' : 'black' }}>
+            {sheetSettingsChanged ? 'シートのインポート設定の変更あり' : 'シートのインポート設定の変更なし'}
+          </span>
+          <button className={styles.saveBtn}
+                  onClick={saveCurrentSheetSettings}
+                  disabled={!sheetSettingsChanged}>設定変更</button>
+          <button onClick={()=>setImportOpen(true)}>インポート</button>
+        </label>
       </div>
       <div className={styles.repRangeDiv}>
-        反復範囲:
+        反復範囲(エクスポートとの共通設定):
         <input ref={sheetRepRangeTB} type="text" defaultValue={currentSheet.repRange} onChange={repSettingIsChanged}/>
         <button type="button" onClick={importRepRange}>選択範囲から取り込み</button>
-      </div>
-      <div className={styles.prefixDiv}>
-        <div>
-          <h4>プレフィックス</h4>
-          <span className={styles.glue}></span>
-          <button id="importPrefixBtn"
-                  className={styles.importPrefixBtn}
-                  onClick={()=>setImportPrefixOpen(true)}>
-            プレフィックスを取り込む
-          </button>
-        </div>
-        <MyDialog isVisible={isImportPrefixOpen}
-                  onClose={()=>setImportPrefixOpen(false)}>
-          <p>取り込みたいプレフィックスをクリックして下さい。</p>
-          { appData.prefixes.split("\n").map((line) => {
-            return <p onClick={importPrefix}>{line}</p>;
-          })}
-        </MyDialog>
-        
-        <textarea ref={sheetPrefixesTA}
-                  defaultValue={currentSheet.prefixes}
-                  className={styles.prefixTA}
-                  onChange={someSettingIsChanged}/>
-      </div>
-      <div>
-        <h4>1回テンプレート</h4>
-        <textarea ref={sheetOneTimeTemplateTA}
-                  defaultValue={currentSheet.oneTimeTemplate}
-                  className={styles.oneTimeTemplateTA}
-                  onChange={someSettingIsChanged}/>
-      </div>
-      <div>
-        <h4>反復テンプレート</h4>
-        <textarea ref={sheetIterationTemplateTA}
-                  defaultValue={currentSheet.iterationTemplate}
-                  className={styles.iterationTemplateTA}
-                  onChange={someSettingIsChanged}
-                  disabled={!(iterationNeeded)}/>
       </div>
       <div>
         <h4>追加インポートRDFのURL</h4>
@@ -220,9 +158,13 @@ const Export: React.FC<Props> = ({ settings, onChange }) => {
                   onChange={someSettingIsChanged}/>
       </div>
       <div className={styles.pathDiv}>
-        <label htmlFor="rdfURLTB">RDF URL</label>
+        <label htmlFor="rdfURLTB">RDF URL(エクスポートとの共通設定)</label>
         <input ref={sheetRdfURLTB} type="text" defaultValue={currentSheet.rdfPodUrl} onChange={someSettingIsChanged}/>
       </div>
+      <MyDialog isVisible={isImportOpen} onClose={()=>setImportOpen(false)}>
+        <ImportComponent settings={settings}
+                         onImported={()=>setImportOpen(false)}/>
+      </MyDialog>
     </div>
   );
 };

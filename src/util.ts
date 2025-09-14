@@ -1,8 +1,12 @@
 //import { handleIncomingRedirect, login, logout, authFetch } from '@inrupt/solid-client-authn-browser';
 const  { handleIncomingRedirect, login, logout, fetch } = (window as any).solidClientAuthentication;
+import { defaultAppData } from './AppDataContext';
 import { QueryEngine } from '@comunica/query-sparql'; // 下で動的インポートにしたらエラーになった？
 import type { SourceType } from '@comunica/types';
 import * as N3 from 'n3';
+
+const RDFSheetLocalStorageKey = 'RDFSheetLocalStorageKey';
+const localStorage = (window as any).localStorage;
 
 export const authFetch = fetch;
 
@@ -28,10 +32,37 @@ async function appendTurtleToStore(turtle: string, store: N3.Store, base: string
   });
 }
 
+function getAppData() {
+  const saved = localStorage.getItem(RDFSheetLocalStorageKey);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        return { ...defaultAppData, ...parsed };
+      }
+    } catch(e) {
+      
+    }
+  } else {
+    return {"prefixes":"@prefix dc: <http://purl.org/dc/terms/> .","idp":"https://solidweb.me","":""};
+  }
+}
+
 export const myLogin = async (idp: string) => {
-  await login({
-    oidcIssuer: idp
-  });
+  const appData = getAppData();
+  let client = null;
+  for (const c of appData.clientIDs) {
+    if (idp.indexOf(c.provider) >= 0) {
+      client = c;
+      break;
+    }
+  }
+  const opt: any = { oidcIssuer: idp };
+  if (client) {
+    opt.clientId = atob(client.id);
+    opt.clientSecret = atob(client.secret);
+  }
+  await login(opt);
 };
 
 export const myLogout = () => {
